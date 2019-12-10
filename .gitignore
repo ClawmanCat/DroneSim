@@ -1,0 +1,6 @@
+.vs/
+
+dependencies/debug/*
+dependencies/release/*
+
+build/

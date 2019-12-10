@@ -1,0 +1,10 @@
+[requires]
+boost/1.71.0
+abseil/20181200@bincrafters/stable
+glm/0.9.9.5@g-truc/stable
+sdl2/2.0.10@bincrafters/stable
+glew/2.1.0@bincrafters/stable
+khronos-opencl-icd-loader/20191007@bincrafters/stable
+
+[generators]
+visual_studio

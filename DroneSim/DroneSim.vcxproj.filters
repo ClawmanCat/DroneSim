@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="FileIO.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{d46ec602-c36f-4217-8956-b5e22e0d8762}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\Core">
+      <UniqueIdentifier>{33a4cd73-46a7-478b-ba64-9e2cca6efd0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\OpenCL">
+      <UniqueIdentifier>{688933b5-ec54-4d6f-80d2-426aacc0fcef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\OpenCL\Kernels">
+      <UniqueIdentifier>{90d31483-29ea-420d-beb7-fc5f57997b77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\Traits">
+      <UniqueIdentifier>{30909c42-12f5-472f-aa52-340bfaa430c8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GPUProgram.h">
+      <Filter>Utility\OpenCL</Filter>
+    </ClInclude>
+    <ClInclude Include="CLCompiler.h">
+      <Filter>Utility\OpenCL</Filter>
+    </ClInclude>
+    <ClInclude Include="Core.h">
+      <Filter>Utility\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Typedefs.h">
+      <Filter>Utility\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="FileIO.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Terminate.h">
+      <Filter>Utility\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="CLBuffer.h">
+      <Filter>Utility\OpenCL</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="StringUtils.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="InstantiatesTemplate.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="KernelArgumentTransform.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="Pack.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="IsContainer.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="ElementType.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="KernelArgumentMemoryAddress.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\copy_to_build\kernels\test.cl">
+      <Filter>Utility\OpenCL\Kernels</Filter>
+    </None>
+  </ItemGroup>
+</Project>
