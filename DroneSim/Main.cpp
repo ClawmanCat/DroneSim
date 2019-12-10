@@ -1,4 +1,13 @@
-#include "CLCompiler.h"
+#define SDL_MAIN_HANDLED
+#include "template.h"
+
+int main(int argc, char** argv) {
+    SDL_SetMainReady();
+    old_main(argc, argv);
+}
+
+
+/*#include "CLCompiler.h"
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
@@ -30,4 +39,4 @@ int main(int argc, char** argv) {
     for (const auto& elem : result) std::cout << i++ << ": " << elem << '\n';
 
     return 0;
-}
+}*/

@@ -5,6 +5,30 @@
     <ClCompile Include="FileIO.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="template.cpp">
+      <Filter>Old\template</Filter>
+    </ClCompile>
+    <ClCompile Include="surface.cpp">
+      <Filter>Old\template</Filter>
+    </ClCompile>
+    <ClCompile Include="game.cpp">
+      <Filter>Old</Filter>
+    </ClCompile>
+    <ClCompile Include="tank.cpp">
+      <Filter>Old</Filter>
+    </ClCompile>
+    <ClCompile Include="particle_beam.cpp">
+      <Filter>Old</Filter>
+    </ClCompile>
+    <ClCompile Include="smoke.cpp">
+      <Filter>Old</Filter>
+    </ClCompile>
+    <ClCompile Include="rocket.cpp">
+      <Filter>Old</Filter>
+    </ClCompile>
+    <ClCompile Include="explosion.cpp">
+      <Filter>Old</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utility">
@@ -21,6 +45,18 @@
     </Filter>
     <Filter Include="Utility\Traits">
       <UniqueIdentifier>{30909c42-12f5-472f-aa52-340bfaa430c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{8f3370a0-ef6c-4b19-99fe-156ec02595c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{d79162c7-0e88-4d57-871d-9d4303bdf84f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Old">
+      <UniqueIdentifier>{21693206-6c00-452b-bdd8-b75b8d0aaf7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Old\template">
+      <UniqueIdentifier>{16e6dc04-1435-4aec-be3a-f7210f21e58e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -68,6 +104,39 @@
     </ClInclude>
     <ClInclude Include="KernelArgumentMemoryAddress.h">
       <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="GameController.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowController.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="template.h">
+      <Filter>Old\template</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Old\template</Filter>
+    </ClInclude>
+    <ClInclude Include="surface.h">
+      <Filter>Old\template</Filter>
+    </ClInclude>
+    <ClInclude Include="game.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="tank.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="particle_beam.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="smoke.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="rocket.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="explosion.h">
+      <Filter>Old</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

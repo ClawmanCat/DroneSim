@@ -4,3 +4,12 @@ dependencies/debug/*
 dependencies/release/*
 
 build/
+
+
+# Lock files for text documents
+*.odt#
+
+
+# Temporary exclusions for FreeImage
+FreeImage/*
+!FreeImage/Source/
