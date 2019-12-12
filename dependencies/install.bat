@@ -1,6 +1,10 @@
 @echo off
 
 
+mkdir -p debug
+mkdir -p release
+
+
 echo Running conan for debug configuration...
 
 set CONAN_TRACE_FILE=%~dp0debug\conan_trace.log

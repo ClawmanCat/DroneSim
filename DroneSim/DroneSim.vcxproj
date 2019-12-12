@@ -115,6 +115,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CLCompiler.cpp" />
     <ClCompile Include="explosion.cpp" />
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="game.cpp" />
@@ -132,26 +133,36 @@
     <ClInclude Include="CLBuffer.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="ElementType.h" />
+    <ClInclude Include="EntityRocket.h" />
+    <ClInclude Include="EntityTank.h" />
     <ClInclude Include="explosion.h" />
     <ClInclude Include="FileIO.h" />
+    <ClInclude Include="FindTupleType.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="GameController.h" />
     <ClInclude Include="GPUProgram.h" />
+    <ClInclude Include="IEntity.h" />
     <ClInclude Include="InstantiatesTemplate.h" />
+    <ClInclude Include="IRenderable.h" />
     <ClInclude Include="IsContainer.h" />
     <ClInclude Include="KernelArgumentMemoryAddress.h" />
     <ClInclude Include="KernelArgumentTransform.h" />
     <ClInclude Include="Pack.h" />
     <ClInclude Include="particle_beam.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Renderer2D.h" />
     <ClInclude Include="rocket.h" />
     <ClInclude Include="smoke.h" />
+    <ClInclude Include="StaticPolymorphism.h" />
     <ClInclude Include="StringUtils.h" />
     <ClInclude Include="surface.h" />
     <ClInclude Include="tank.h" />
     <ClInclude Include="template.h" />
     <ClInclude Include="Terminate.h" />
     <ClInclude Include="Typedefs.h" />
+    <ClInclude Include="Utility.h" />
+    <ClInclude Include="VariadicSplitter.h" />
+    <ClInclude Include="VariadicStorage.h" />
     <ClInclude Include="WindowController.h" />
   </ItemGroup>
   <ItemGroup>

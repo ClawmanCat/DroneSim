@@ -29,6 +29,9 @@
     <ClCompile Include="explosion.cpp">
       <Filter>Old</Filter>
     </ClCompile>
+    <ClCompile Include="CLCompiler.cpp">
+      <Filter>Utility\OpenCL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utility">
@@ -57,6 +60,9 @@
     </Filter>
     <Filter Include="Old\template">
       <UniqueIdentifier>{16e6dc04-1435-4aec-be3a-f7210f21e58e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Entity">
+      <UniqueIdentifier>{dbd37f14-330b-450a-acb4-c180b6e25ebb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +143,36 @@
     </ClInclude>
     <ClInclude Include="explosion.h">
       <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="IEntity.h">
+      <Filter>Game\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer2D.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="IRenderable.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="VariadicStorage.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="VariadicSplitter.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="FindTupleType.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticPolymorphism.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityTank.h">
+      <Filter>Game\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityRocket.h">
+      <Filter>Game\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Utility\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

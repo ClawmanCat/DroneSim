@@ -4,5 +4,6 @@
 
 #include "Typedefs.h"
 #include "Terminate.h"
+#include "Utility.h"
 
 #include <cassert>
