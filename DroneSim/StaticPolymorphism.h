@@ -44,12 +44,14 @@ namespace DroneSim::Traits {
             template <typename...> typename Wrapper
         > class PolymorphicContainer : public std::tuple<Container<decltype(GetContainedType<Classes, Wrapper>())>...> {
         public:
-            using std::tuple<Container<decltype(GetContainedType<Classes, Wrapper>())>...>::tuple;
+            using self = std::tuple<Container<decltype(GetContainedType<Classes, Wrapper>())>...>;
+            using typename self::tuple;
 
             template <typename... Ts> using container = Container<Ts...>;
             template <typename... Ts> using wrapper   = Wrapper<Ts...>;
-        };
 
+            constexpr static std::size_t Size = sizeof...(Classes);
+        };
 
         // Does the list of classes contain T?
         template <typename T> constexpr static bool Contains(void) {
@@ -57,15 +59,33 @@ namespace DroneSim::Traits {
         }
     };
 
+    // std::get but for PolymorphicContainer
+    template <std::size_t N, typename Container> constexpr static auto PolyContainerGet(Container& c) {
+        return std::get<N>(static_cast<typename Container::self>(c));
+    }
+
+    // std::tuple_size but for PolymorphicContainer
+    template <typename Container> constexpr static std::size_t PolyContainerSize(void) {
+        return std::tuple_size_v<typename Container::self>;
+    }
+
+    // FindTupleType but for PolymorphicContainer
+    template <typename T, typename Container, std::size_t Next = 0> constexpr static std::size_t FindPolyContainerSubType(void) {
+        if constexpr (std::is_same_v<T, decltype(PolyContainerGet<Next>(std::declval<const Container>()))>) return Next;
+
+        if constexpr (Next + 1 < Container::Size) return FindPolyContainerSubType<T, Container, Next + 1>();
+        else return false;
+    }
+
     // Loop over a fake polymorphic container.
     template <typename Container, typename Pred, std::size_t Next = 0> constexpr inline void PolyContainerForEach(Container& container, const Pred& pred) {
-        for (auto& elem : std::get<Next>(container)) pred(elem);
-        if constexpr (Next + 1 < std::tuple_size_v<Container>) PolyContainerForEach<Container, Pred, Next + 1>(container, pred);
+        for (auto& elem : PolyContainerGet<Next>(container)) pred(elem);
+        if constexpr (Next + 1 < PolyContainerSize<Container>()) PolyContainerForEach<Container, Pred, Next + 1>(container, pred);
     }
 
     // Get the underlying subcontainer of a given type in the fake-polymorphic compound container.
     template <typename T, template <typename...> typename Wrapper, typename Container> constexpr inline auto PolySubContainerForT(Container& t) {
-        if constexpr (std::is_same_v<Wrapper<T>, NoWrapperType<T>>) return std::get<FindTupleType<typename Container::template container<T>, Container>()>(t);
-        else return std::get<FindTupleType<Wrapper<typename Container::template container<T>>, Container>()>(t);
+        if constexpr (std::is_same_v<Wrapper<T>, NoWrapperType<T>>) return PolyContainerGet<FindPolyContainerSubType<typename Container::template container<T>, Container>()>(t);
+        else return PolyContainerGet<FindPolyContainerSubType<typename Container::template container<T>>, Container>()>(t);
     }
 }
