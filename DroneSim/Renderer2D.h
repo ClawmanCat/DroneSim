@@ -18,18 +18,18 @@ namespace DroneSim::Render {
         }
 
 
-        template <typename T, typename = std::enable_if_t<Renderables::Contains<std::remove_reference_t<T>>()>>
+        template <typename T, typename = std::enable_if_t<Renderables::Contains<ConstRefWrapper<T>>()>>
         void add(const T& object) {
-            Traits::PolySubContainerForT<T, ConstRefWrapper>(renderables).push_back(std::cref(object));
+            Traits::PolyContainerGetT<T>(renderables).push_back(object);
         }
 
-        template <typename T, typename = std::enable_if_t<Renderables::Contains<std::remove_reference_t<T>>()>>
+        template <typename T, typename = std::enable_if_t<Renderables::Contains<ConstRefWrapper<T>>()>>
         void remove(const T& object) {
-            auto& v = Traits::PolySubContainerForT<T, ConstRefWrapper>(renderables);
-            Utility::swap_erase(v, std::find(v.begin(), v.end(), std::cref(object)));
+            auto& container = Traits::PolyContainerGetT<T>(renderables);
+            Utility::swap_erase(container, std::find(container.begin(), container.end(), object));
         }
     private:
-        // TODO: Test with using HashMap.
-        Renderables::PolymorphicContainer<std::vector, ConstRefWrapper> renderables;
+        // TODO: Test with using HashSet for faster lookup when removing.
+        Renderables::PolyContainer<std::vector, ConstRefWrapper> renderables;
     };
 }

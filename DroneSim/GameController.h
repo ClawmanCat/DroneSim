@@ -15,7 +15,7 @@
 
 namespace DroneSim::Game {
     class GameController {
-        using EntityList = Traits::DerivingClassList<IEntity, EntityTank, EntityRocket>;
+        using Entities = Traits::DerivingClassList<IEntity, EntityTank, EntityRocket>;
     public:
         static GameController& instance(void) {
             static GameController instance { };
@@ -27,25 +27,28 @@ namespace DroneSim::Game {
             this->args = std::move(args);
 
             addEntity(EntityTank());
+            addEntity(EntityTank());
+            addEntity(EntityRocket());
+            addEntity(EntityRocket());
 
             loop();
         }
 
 
-        template <typename T, typename = std::enable_if_t<EntityList::Contains<std::remove_reference_t<T>>()>> void addEntity(T&& entity) {
-            Traits::PolySubContainerForT<T, Traits::NoWrapperType>(entities).push_back(std::move(entity));
+        template <typename T, typename = std::enable_if_t<Entities::Contains<T>()>> void addEntity(T&& entity) {
+            Traits::PolyContainerGetT<T>(entities).push_back(std::move(entity));
         }
 
 
-        template <typename T, typename = std::enable_if_t<EntityList::Contains<std::remove_reference_t<T>>()>> void removeEntity(const T& entity) {
-            auto& v = Traits::PolySubContainerForT<T, Traits::NoWrapperType>(entities);
+        template <typename T, typename = std::enable_if_t<Entities::Contains<T>()>> void removeEntity(const T& entity) {
+            auto& v = Traits::PolyContainerGetT<T>(entities)
             Utility::swap_erase(v, std::find(v.begin(), v.end(), entity));
         }
     private:
         std::vector<std::string> args;
         u64 frames = 0;
 
-        EntityList::PolymorphicContainer<std::vector, Traits::NoWrapperType> entities;
+        Entities::PolyContainer<std::vector> entities;
 
 
         void loop(void) {
