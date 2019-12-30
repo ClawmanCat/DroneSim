@@ -1,8 +1,14 @@
 #include "FileIO.h"
 
 #include <fstream>
+#include <filesystem>
 
 namespace DroneSim::FileIO {
+    static bool exists(std::string_view path) {
+        return std::filesystem::exists(path);
+    }
+
+
     // Get size of file. Assumes the current get position is the start of the file.
     template <typename Stream> static std::size_t file_size(Stream& stream) {
         auto begpos = stream.tellg();
@@ -15,6 +21,8 @@ namespace DroneSim::FileIO {
 
 
     std::optional<TextFile> ReadText(std::string_view path) {
+        if (!exists(path)) return std::nullopt;
+
         std::ifstream stream(path.data());
         if (stream.bad()) return std::nullopt;
 
@@ -38,6 +46,8 @@ namespace DroneSim::FileIO {
 
 
     std::optional<DataFile> ReadData(std::string_view path) {
+        if (!exists(path)) return std::nullopt;
+
         std::ifstream stream(path.data(), std::ios::binary);
         if (stream.bad()) return std::nullopt;
 

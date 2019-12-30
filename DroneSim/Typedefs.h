@@ -12,6 +12,7 @@
 
 #include <cstdint>
 
+
 namespace DroneSim {
     // Guaranteed-size integers & matching floating point typedefs.
     using u8  =  uint8_t;
@@ -24,8 +25,15 @@ namespace DroneSim {
     using i64 =  int64_t;
 
     using f32 = float;
-    using f64 = long double;
+    using f64 = double;
 
+
+
+    // Function Pointer / Pointer to member
+    template <typename Ret, typename... Args>                   using FPtr  = Ret(       *)(Args...);
+    template <typename Class, typename Ret, typename... Args>   using MFPtr = Ret(Class::*)(Args...);
+    template <typename Class, typename T>                       using MDPtr = T  (Class::*);
+    
 
 
     // Abseil Hash Map / Set.
@@ -51,11 +59,14 @@ namespace DroneSim {
     using Mat##X##x##Y##ub = Mat##X##x##Y<u8 >;                        \
     using Mat##X##x##Y##b  = Mat##X##x##Y<i8 >;                        \
     using Mat##X##x##Y##us = Mat##X##x##Y<u16>;                        \
-    using Mat##X##x##Y##s  = Mat##X##x##Y<u16>;                        \
+    using Mat##X##x##Y##s  = Mat##X##x##Y<i16>;                        \
     using Mat##X##x##Y##ui = Mat##X##x##Y<u32>;                        \
-    using Mat##X##x##Y##i  = Mat##X##x##Y<u32>;                        \
+    using Mat##X##x##Y##i  = Mat##X##x##Y<i32>;                        \
     using Mat##X##x##Y##ul = Mat##X##x##Y<u64>;                        \
-    using Mat##X##x##Y##l  = Mat##X##x##Y<u64>;
+    using Mat##X##x##Y##l  = Mat##X##x##Y<i64>;                        \
+                                                                       \
+    using Mat##X##x##Y##f = Mat##X##x##Y<f32>;                         \
+    using Mat##X##x##Y##d = Mat##X##x##Y<f64>;
 
 
     #define DRONESIM_GLM_TYPEDEFS_FOR_SIZE(Size)                       \
@@ -64,11 +75,11 @@ namespace DroneSim {
     using Vec##Size##ub = Vec##Size<u8 >;                              \
     using Vec##Size##b  = Vec##Size<i8 >;                              \
     using Vec##Size##us = Vec##Size<u16>;                              \
-    using Vec##Size##s  = Vec##Size<u16>;                              \
+    using Vec##Size##s  = Vec##Size<i16>;                              \
     using Vec##Size##ui = Vec##Size<u32>;                              \
-    using Vec##Size##i  = Vec##Size<u32>;                              \
+    using Vec##Size##i  = Vec##Size<i32>;                              \
     using Vec##Size##ul = Vec##Size<u64>;                              \
-    using Vec##Size##l  = Vec##Size<u64>;                              \
+    using Vec##Size##l  = Vec##Size<i64>;                              \
                                                                        \
     using Vec##Size##f  = Vec##Size<f32>;                              \
     using Vec##Size##d  = Vec##Size<f64>;                              \
@@ -83,11 +94,15 @@ namespace DroneSim {
     using Mat##Size##ub = Mat##Size##x##Size<u8 >;                     \
     using Mat##Size##b  = Mat##Size##x##Size<i8 >;                     \
     using Mat##Size##us = Mat##Size##x##Size<u16>;                     \
-    using Mat##Size##s  = Mat##Size##x##Size<u16>;                     \
+    using Mat##Size##s  = Mat##Size##x##Size<i16>;                     \
     using Mat##Size##ui = Mat##Size##x##Size<u32>;                     \
-    using Mat##Size##i  = Mat##Size##x##Size<u32>;                     \
+    using Mat##Size##i  = Mat##Size##x##Size<i32>;                     \
     using Mat##Size##ul = Mat##Size##x##Size<u64>;                     \
-    using Mat##Size##l  = Mat##Size##x##Size<u64>;                     \
+    using Mat##Size##l  = Mat##Size##x##Size<i64>;                     \
+                                                                       \
+    using Mat##Size##f = Mat##Size##x##Size<f32>;                      \
+    using Mat##Size##d = Mat##Size##x##Size<f64>;                      \
+                                                                       \
                                                                        \
     DRONESIM_GLM_TYPEDEFS_FOR_MATRIX_SIZE(2, Size);                    \
     DRONESIM_GLM_TYPEDEFS_FOR_MATRIX_SIZE(3, Size);                    \

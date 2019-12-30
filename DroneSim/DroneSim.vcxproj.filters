@@ -2,9 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="FileIO.cpp">
-      <Filter>Utility</Filter>
-    </ClCompile>
     <ClCompile Include="template.cpp">
       <Filter>Old\template</Filter>
     </ClCompile>
@@ -29,8 +26,26 @@
     <ClCompile Include="explosion.cpp">
       <Filter>Old</Filter>
     </ClCompile>
+    <ClCompile Include="FileIO.cpp">
+      <Filter>Utility\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="LodePNG.cpp">
+      <Filter>Utility\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityRocket.cpp">
+      <Filter>Game\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityTank.cpp">
+      <Filter>Game\Entity</Filter>
+    </ClCompile>
     <ClCompile Include="CLCompiler.cpp">
-      <Filter>Utility\OpenCL</Filter>
+      <Filter>GPU\OpenCL</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowController.cpp">
+      <Filter>GPU\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="GLCompiler.cpp">
+      <Filter>GPU\OpenGL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -40,20 +55,11 @@
     <Filter Include="Utility\Core">
       <UniqueIdentifier>{33a4cd73-46a7-478b-ba64-9e2cca6efd0e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utility\OpenCL">
-      <UniqueIdentifier>{688933b5-ec54-4d6f-80d2-426aacc0fcef}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Utility\OpenCL\Kernels">
-      <UniqueIdentifier>{90d31483-29ea-420d-beb7-fc5f57997b77}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Utility\Traits">
       <UniqueIdentifier>{30909c42-12f5-472f-aa52-340bfaa430c8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Game">
       <UniqueIdentifier>{8f3370a0-ef6c-4b19-99fe-156ec02595c5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer">
-      <UniqueIdentifier>{d79162c7-0e88-4d57-871d-9d4303bdf84f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Old">
       <UniqueIdentifier>{21693206-6c00-452b-bdd8-b75b8d0aaf7b}</UniqueIdentifier>
@@ -64,28 +70,37 @@
     <Filter Include="Game\Entity">
       <UniqueIdentifier>{dbd37f14-330b-450a-acb4-c180b6e25ebb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utility\IO">
+      <UniqueIdentifier>{728dcab6-474c-4223-924a-8a41678d8f24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GPU">
+      <UniqueIdentifier>{583b0631-d848-48dc-b838-1e203d9f4617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GPU\OpenGL">
+      <UniqueIdentifier>{bf0ccf4a-b4f7-4354-b8da-c01ca15a68be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GPU\OpenCL">
+      <UniqueIdentifier>{8a0bd270-15ee-440b-ac7b-0a8e57cec4eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GPU\OpenCL\Kernels">
+      <UniqueIdentifier>{90d31483-29ea-420d-beb7-fc5f57997b77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GPU\OpenGL\Shaders">
+      <UniqueIdentifier>{7fe36fec-f86a-4df4-beea-cf9140e8cfbd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GPU\Renderer">
+      <UniqueIdentifier>{3c06650c-bd1c-4d72-bea0-8fcbe9377a7e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GPUProgram.h">
-      <Filter>Utility\OpenCL</Filter>
-    </ClInclude>
-    <ClInclude Include="CLCompiler.h">
-      <Filter>Utility\OpenCL</Filter>
-    </ClInclude>
     <ClInclude Include="Core.h">
       <Filter>Utility\Core</Filter>
     </ClInclude>
     <ClInclude Include="Typedefs.h">
       <Filter>Utility\Core</Filter>
     </ClInclude>
-    <ClInclude Include="FileIO.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
     <ClInclude Include="Terminate.h">
       <Filter>Utility\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="CLBuffer.h">
-      <Filter>Utility\OpenCL</Filter>
     </ClInclude>
     <ClInclude Include="Buffer.h">
       <Filter>Utility</Filter>
@@ -94,9 +109,6 @@
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="InstantiatesTemplate.h">
-      <Filter>Utility\Traits</Filter>
-    </ClInclude>
-    <ClInclude Include="KernelArgumentTransform.h">
       <Filter>Utility\Traits</Filter>
     </ClInclude>
     <ClInclude Include="Pack.h">
@@ -108,14 +120,8 @@
     <ClInclude Include="ElementType.h">
       <Filter>Utility\Traits</Filter>
     </ClInclude>
-    <ClInclude Include="KernelArgumentMemoryAddress.h">
-      <Filter>Utility\Traits</Filter>
-    </ClInclude>
     <ClInclude Include="GameController.h">
       <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowController.h">
-      <Filter>Renderer</Filter>
     </ClInclude>
     <ClInclude Include="template.h">
       <Filter>Old\template</Filter>
@@ -147,12 +153,6 @@
     <ClInclude Include="IEntity.h">
       <Filter>Game\Entity</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer2D.h">
-      <Filter>Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="IRenderable.h">
-      <Filter>Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="VariadicStorage.h">
       <Filter>Utility</Filter>
     </ClInclude>
@@ -174,10 +174,85 @@
     <ClInclude Include="Utility.h">
       <Filter>Utility\Core</Filter>
     </ClInclude>
+    <ClInclude Include="FileIO.h">
+      <Filter>Utility\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="LodePNG.h">
+      <Filter>Utility\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="PNGLoader.h">
+      <Filter>Utility\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="IGPURunnable.h">
+      <Filter>GPU</Filter>
+    </ClInclude>
+    <ClInclude Include="GLProgram.h">
+      <Filter>GPU\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="CLProgram.h">
+      <Filter>GPU\OpenCL</Filter>
+    </ClInclude>
+    <ClInclude Include="IGPUCompiler.h">
+      <Filter>GPU</Filter>
+    </ClInclude>
+    <ClInclude Include="GLCompiler.h">
+      <Filter>GPU\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="IGPUBuffer.h">
+      <Filter>GPU</Filter>
+    </ClInclude>
+    <ClInclude Include="GLBuffer.h">
+      <Filter>GPU\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="CLBuffer.h">
+      <Filter>GPU\OpenCL</Filter>
+    </ClInclude>
+    <ClInclude Include="CLCompiler.h">
+      <Filter>GPU\OpenCL</Filter>
+    </ClInclude>
+    <ClInclude Include="CLGroupSize.h">
+      <Filter>GPU\OpenCL</Filter>
+    </ClInclude>
+    <ClInclude Include="ILayoutObject.h">
+      <Filter>GPU</Filter>
+    </ClInclude>
+    <ClInclude Include="ExtractVectorDetails.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowController.h">
+      <Filter>GPU\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer2D.h">
+      <Filter>GPU\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="IRenderable.h">
+      <Filter>GPU\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderableList.h">
+      <Filter>GPU\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="GLSetUniform.h">
+      <Filter>GPU\OpenGL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\copy_to_build\kernels\test.cl">
-      <Filter>Utility\OpenCL\Kernels</Filter>
+      <Filter>GPU\OpenCL\Kernels</Filter>
+    </None>
+    <None Include="..\copy_to_build\shaders\batch.frag.glsl">
+      <Filter>GPU\OpenGL\Shaders</Filter>
+    </None>
+    <None Include="..\copy_to_build\shaders\batch.vert.glsl">
+      <Filter>GPU\OpenGL\Shaders</Filter>
+    </None>
+    <None Include="..\copy_to_build\shaders\batch.geo.glsl">
+      <Filter>GPU\OpenGL\Shaders</Filter>
+    </None>
+    <None Include="..\copy_to_build\shaders\test.frag.glsl">
+      <Filter>GPU\OpenGL\Shaders</Filter>
+    </None>
+    <None Include="..\copy_to_build\shaders\test.vert.glsl">
+      <Filter>GPU\OpenGL\Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

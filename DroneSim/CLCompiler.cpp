@@ -1,17 +1,13 @@
 #include "CLCompiler.h"
 #include "Buffer.h"
+#include "FileIO.h"
+#include "StringUtils.h"
 
-namespace DroneSim::CL {
-    // Singleton Object.
+
+namespace DroneSim::GPU {
     CLCompiler& CLCompiler::instance(void) {
         static CLCompiler instance{ };
         return instance;
-    }
-
-
-    CLCompiler::~CLCompiler(void) {
-        clReleaseCommandQueue(queue);
-        clReleaseContext(context);
     }
 
 
@@ -50,14 +46,46 @@ namespace DroneSim::CL {
     }
 
 
-    u32 CLCompiler::select_best_cl_device(cl_device_id* devices, u32 deviceCount) {
+    CLCompiler::~CLCompiler(void) {
+        clReleaseCommandQueue(queue);
+        clReleaseContext(context);
+    }
+
+
+    CLCompiler::ProgramType CLCompiler::compile(const std::string& name) {
+        // Load source
+        auto source = FileIO::ReadText(StringUtils::cat(Paths::PATH_KERNELS, name, ".cl"));
+        if (!source) terminate("Failed to read program source from file.");
+
+        std::string cat = StringUtils::cat(source.value());
+        const char* cstr = cat.c_str();
+
+
+        // Compile program
+        i32 status;
+
+        cl_program program = clCreateProgramWithSource(context, 1, &cstr, nullptr, &status);
+        if (status != CL_SUCCESS) terminate("OpenCL failed to create program from source.", status);
+
+        status = clBuildProgram(program, 1, &device, nullptr, nullptr, nullptr);
+        if (status != CL_SUCCESS) terminate("OpenCL failed to build program.", status);
+
+        cl_kernel kernel = clCreateKernel(program, "main", &status);
+        if (status != CL_SUCCESS) terminate("OpenCL failed to create kernel.", status);
+
+
+        return CLProgram(program, kernel, &context, &queue);
+    }
+
+
+    u32 CLCompiler::select_best_cl_device(cl_device_id* devices, u32 count) {
         // If there's only one GPU, that's the one we pick.
-        if (deviceCount == 1) return 0;
+        if (count == 1) return 0;
 
         // Multiple devices: approximate which one is more powerful.
         u32 currentID = 0, currentPower = 0;
 
-        for (u32 i = 0; i < deviceCount; ++i) {
+        for (u32 i = 0; i < count; ++i) {
             std::size_t frequency, cores;
             i32 status = CL_SUCCESS;
 
@@ -78,17 +106,5 @@ namespace DroneSim::CL {
         }
 
         return currentID;
-    }
-
-    std::string CLCompiler::get_opencl_error_log(cl_device_id device, cl_program program) {
-        std::size_t size;
-        clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, 0, nullptr, &size);
-
-        std::string log;
-        log.resize(size);
-
-        clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, size, &log[0], nullptr);
-
-        return log;
     }
 }

@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "WindowController.h"
+#include "Renderer2D.h"
 #include "StaticPolymorphism.h"
 
 #include "IEntity.h"
@@ -12,6 +13,12 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+
+#include "GLCompiler.h"
+#include "GLBuffer.h"
+#include "GLProgram.h"
+#include "ILayoutObject.h"
+
 
 namespace DroneSim::Game {
     class GameController {
@@ -26,10 +33,42 @@ namespace DroneSim::Game {
         void start(std::vector<std::string>&& args) {
             this->args = std::move(args);
 
-            addEntity(EntityTank());
-            addEntity(EntityTank());
-            addEntity(EntityRocket());
-            addEntity(EntityRocket());
+            // Force initialization.
+            Render::WindowController::instance();
+            Render::Renderer2D::instance();
+
+
+            struct Vertex2D : public GPU::ILayoutObject<Vertex2D> {
+                Vertex2D(Vec2f pos) : position(pos) {}
+
+                Vec2f position;
+
+                static std::vector<GPU::LayoutComponent> GetObjectLayout(void) {
+                    return { DRONESIM_GEN_LAYOUT_OBJ(Vertex2D, position) };
+                }
+            };
+
+            std::vector<Vertex2D> vertices = {
+                { { 0.0f, 0.0f } }, { { 0.2f, 0.0f } }, { { 0.2f, 0.2f } },
+                { { 0.0f, 0.4f } }, { { 0.2f, 0.4f } }, { { 0.2f, 0.6f } }
+            };
+
+            auto program = GPU::GLCompiler::instance().compile("test");
+            auto buffer  = GPU::GLBuffer(GL_TRIANGLES, vertices);
+
+            program.addBuffer(buffer);
+            
+            float t = 0;
+            while (true) {
+                Render::WindowController::instance().onFrameStart();
+                
+                program.setUniform(t, "t");
+                program.execute();
+
+                Render::WindowController::instance().onFrameEnd();
+
+                t += 0.001;
+            }
 
             loop();
         }
@@ -52,12 +91,10 @@ namespace DroneSim::Game {
 
 
         void loop(void) {
-            auto& window = Render::WindowController::instance();
+            auto& window   = Render::WindowController::instance();
+            auto& renderer = Render::Renderer2D::instance();
 
             while (!window.shouldClose()) {
-                // Render the world.
-                window.onFrameStart();
-
                 if (frames < 2000) {
                     // Progress simulation
                     Traits::PolyContainerForEach(entities, [](auto& entity) { entity.update(); });
@@ -65,6 +102,9 @@ namespace DroneSim::Game {
                     // Show results.
                 }
 
+                // Render the simulation.
+                window.onFrameStart();
+                renderer.renderFrame();
                 window.onFrameEnd();
 
                 ++frames;

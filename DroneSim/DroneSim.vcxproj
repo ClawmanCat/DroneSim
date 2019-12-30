@@ -116,9 +116,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CLCompiler.cpp" />
+    <ClCompile Include="EntityRocket.cpp" />
+    <ClCompile Include="EntityTank.cpp" />
     <ClCompile Include="explosion.cpp" />
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="GLCompiler.cpp" />
+    <ClCompile Include="LodePNG.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="particle_beam.cpp" />
     <ClCompile Include="rocket.cpp" />
@@ -126,11 +130,18 @@
     <ClCompile Include="surface.cpp" />
     <ClCompile Include="tank.cpp" />
     <ClCompile Include="template.cpp" />
+    <ClCompile Include="WindowController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.h" />
-    <ClInclude Include="CLCompiler.h" />
     <ClInclude Include="CLBuffer.h" />
+    <ClInclude Include="CLCompiler.h" />
+    <ClInclude Include="CLGroupSize.h" />
+    <ClInclude Include="CLProgram.h" />
+    <ClInclude Include="ExtractVectorDetails.h" />
+    <ClInclude Include="GLBuffer.h" />
+    <ClInclude Include="GLCompiler.h" />
+    <ClInclude Include="GLProgram.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="ElementType.h" />
     <ClInclude Include="EntityRocket.h" />
@@ -140,16 +151,21 @@
     <ClInclude Include="FindTupleType.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="GameController.h" />
-    <ClInclude Include="GPUProgram.h" />
+    <ClInclude Include="GLSetUniform.h" />
     <ClInclude Include="IEntity.h" />
+    <ClInclude Include="IGPUBuffer.h" />
+    <ClInclude Include="IGPUCompiler.h" />
+    <ClInclude Include="IGPURunnable.h" />
+    <ClInclude Include="ILayoutObject.h" />
     <ClInclude Include="InstantiatesTemplate.h" />
     <ClInclude Include="IRenderable.h" />
     <ClInclude Include="IsContainer.h" />
-    <ClInclude Include="KernelArgumentMemoryAddress.h" />
-    <ClInclude Include="KernelArgumentTransform.h" />
+    <ClInclude Include="LodePNG.h" />
     <ClInclude Include="Pack.h" />
     <ClInclude Include="particle_beam.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PNGLoader.h" />
+    <ClInclude Include="RenderableList.h" />
     <ClInclude Include="Renderer2D.h" />
     <ClInclude Include="rocket.h" />
     <ClInclude Include="smoke.h" />
@@ -167,6 +183,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\copy_to_build\kernels\test.cl" />
+    <None Include="..\copy_to_build\shaders\batch.frag.glsl" />
+    <None Include="..\copy_to_build\shaders\batch.geo.glsl" />
+    <None Include="..\copy_to_build\shaders\batch.vert.glsl" />
+    <None Include="..\copy_to_build\shaders\test.frag.glsl" />
+    <None Include="..\copy_to_build\shaders\test.vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

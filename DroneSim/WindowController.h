@@ -3,7 +3,6 @@
 #include "Core.h"
 
 #include <SDL.h>
-#include <GL/glew.h>
 
 #include <string_view>
 
@@ -15,60 +14,15 @@ namespace DroneSim::Render {
         constexpr static std::string_view WINDOW_TITLE = "Drone Simulator";
 
 
-        // Singleton
-        static WindowController& instance(void) {
-            static WindowController instance { WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT };
-            return instance;
-        }
+        static WindowController& instance(void);
 
+        WindowController(std::string_view title, u32 w, u32 h, u32 x = SDL_WINDOWPOS_CENTERED, u32 y = SDL_WINDOWPOS_CENTERED);
+        ~WindowController(void);
 
-        WindowController(std::string_view title, u32 w, u32 h, u32 x = SDL_WINDOWPOS_CENTERED, u32 y = SDL_WINDOWPOS_CENTERED) {
-            SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-            
+        void onFrameStart(void);
+        void onFrameEnd(void);
 
-            handle = SDL_CreateWindow(title.data(), x, y, w, h, SDL_WINDOW_OPENGL);
-            if (!handle) terminate("Failed to create window.");
-
-            SDL_GLContext context = SDL_GL_CreateContext(handle);
-            if (!context) terminate("Failed to create OpenGL context");
-
-
-            GLenum status = glewInit();
-            if (status != GLEW_OK) terminate("Failed to initialize Glew.", status);
-
-
-            SDL_GL_SetSwapInterval(0);
-            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, SDL_TRUE);
-            
-            glClearColor(0.75f, 0.75f, 0.75f, 1.00f);
-        }
-
-
-        ~WindowController(void) {
-            SDL_DestroyWindow(handle);
-        }
-
-
-        void onFrameStart(void) {
-
-        }
-
-
-        void onFrameEnd(void) {
-            SDL_GL_SwapWindow(handle);
-        }
-
-
-        bool shouldClose(void) const {
-            SDL_Event e;
-
-            // TODO: Create class for managing user input.
-            while (SDL_PollEvent(&e)) {
-                if (e.type == SDL_QUIT) return true;
-            }
-
-            return false;
-        }
+        bool shouldClose(void) const;
     private:
         SDL_Window* handle;
     };

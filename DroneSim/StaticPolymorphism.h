@@ -104,4 +104,13 @@ namespace DroneSim::Traits {
             PolyContainerForEach<Container, Pred, Next + 1>(container, pred);
         }
     }
+
+
+    // Iterator over the subcontainers.
+    template <typename Container, typename Pred, std::size_t Next = 0> constexpr static void PolyContainerForEachSub(Container& container, const Pred& pred) {
+        if constexpr (Next < PolyContainerSize<Container>()) {
+            pred(PolyContainerGet<Next>(container));
+            PolyContainerForEachSub<Container, Pred, Next + 1>(container, pred);
+        }
+    }
 }
