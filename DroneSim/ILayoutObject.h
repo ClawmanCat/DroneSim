@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "ExtractVectorDetails.h"
+#include "ExtractArrayDetails.h"
 
 #include <GL/glew.h>
 
@@ -20,7 +21,7 @@ DroneSim::GPU::LayoutComponent {                                                
 
 namespace DroneSim::GPU {
     struct LayoutComponent {
-        std::string name;
+        const char* name;
         std::size_t offset, size, count;
 
         enum ComponentType : GLenum {
@@ -38,21 +39,20 @@ namespace DroneSim::GPU {
         template <typename T> constexpr static ComponentType GetComponentType(void) {
             using type = typename Traits::ExtractVectorDetails<T>::type;
 
-            if constexpr (std::is_same_v<type, u8 >) return LayoutComponent::UBYTE;
-            if constexpr (std::is_same_v<type, i8 >) return LayoutComponent::BYTE;
-            if constexpr (std::is_same_v<type, u16>) return LayoutComponent::USHORT;
-            if constexpr (std::is_same_v<type, i16>) return LayoutComponent::SHORT;
-            if constexpr (std::is_same_v<type, i32>) return LayoutComponent::UINT;
-            if constexpr (std::is_same_v<type, u32>) return LayoutComponent::INT;
-            if constexpr (std::is_same_v<type, f32>) return LayoutComponent::FLOAT;
-            else return LayoutComponent::DOUBLE;
+            // There is a bug in OpenGL where it will reinterpret integers as floating point numbers, and then convert them back
+            // to integers when using anything other than GL_FLOAT.
+            if constexpr (std::is_same_v<type, f64>) return LayoutComponent::DOUBLE;
+            else return LayoutComponent::FLOAT;
         }
     };
 
 
     template <typename D> class ILayoutObject {
     public:
-        static std::vector<LayoutComponent> GetObjectLayout(void) {
+        // returns std::array<LayoutComponent>, but auto because of varying size.
+        constexpr static auto GetObjectLayout(void) {
+            static_assert(Traits::ExtractArrayDetails<decltype(D::GetObjectLayout())>::is_array);
+
             return D::GetObjectLayout();
         }
     protected:

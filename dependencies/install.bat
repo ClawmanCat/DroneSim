@@ -7,7 +7,7 @@ set CONAN_TRACE_FILE=%~dp0debug\conan_trace.log
 type nul > %CONAN_TRACE_FILE%
 
 :: Change --build missing to --build if you need PDB files. This will take significantly longer.
-call conan install . --profile ./debug.conanprofile --install-folder "%~dp0/debug/" --build
+call conan install . --profile ./debug.conanprofile --install-folder "%~dp0/debug/" --build missing
 
 
 echo Running conan for release configuration...

@@ -34,7 +34,7 @@ template <> struct SetImpl<Type> {                                              
     static void Set(GLint index, const Type& value) {                                              \
         using UT = typename DroneSim::GPU::Detail::ToGLUniformT<Type>::type;                       \
         UT v(value);                                                                               \
-        glUniform1##Suffix(index, 1, & v);                                                         \
+        glUniform1##Suffix(index, 1, &v);                                                          \
     }                                                                                              \
 };                                                                                                 \
                                                                                                    \

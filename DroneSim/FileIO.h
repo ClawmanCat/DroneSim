@@ -9,8 +9,9 @@
 
 
 namespace DroneSim::Paths {
-    constexpr static inline std::string_view PATH_KERNELS = "./kernels/";
-    constexpr static inline std::string_view PATH_SHADERS = "./shaders/";
+    constexpr static inline std::string_view PATH_KERNELS  = "./kernels/";
+    constexpr static inline std::string_view PATH_SHADERS  = "./shaders/";
+    constexpr static inline std::string_view PATH_TEXTURES = "./textures/";
 }
 
 

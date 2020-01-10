@@ -9,6 +9,13 @@
 #include <tuple>
 #include <array>
 
+
+#ifdef NDEBUG
+    #define DRONESIM_GLC_PRINT_GL_ERRORS(...)
+#else
+    #define DRONESIM_GLC_PRINT_GL_ERRORS(...) print_gl_errors_impl(__VA_ARGS__)
+#endif
+
 namespace DroneSim::GPU {
     class GLCompiler : public IGPUCompiler<GLCompiler, GLProgram> {
     public:
@@ -40,6 +47,6 @@ namespace DroneSim::GPU {
         GLCompiler(void) = default;
 
 
-        static void print_gl_errors(bool shader, GLenum parameter, GLuint id);
+        static void print_gl_errors_impl(bool shader, GLenum parameter, GLuint id, std::string_view info);
     };
 }

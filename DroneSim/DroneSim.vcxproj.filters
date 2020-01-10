@@ -32,12 +32,6 @@
     <ClCompile Include="LodePNG.cpp">
       <Filter>Utility\IO</Filter>
     </ClCompile>
-    <ClCompile Include="EntityRocket.cpp">
-      <Filter>Game\Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="EntityTank.cpp">
-      <Filter>Game\Entity</Filter>
-    </ClCompile>
     <ClCompile Include="CLCompiler.cpp">
       <Filter>GPU\OpenCL</Filter>
     </ClCompile>
@@ -165,12 +159,6 @@
     <ClInclude Include="StaticPolymorphism.h">
       <Filter>Utility\Traits</Filter>
     </ClInclude>
-    <ClInclude Include="EntityTank.h">
-      <Filter>Game\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="EntityRocket.h">
-      <Filter>Game\Entity</Filter>
-    </ClInclude>
     <ClInclude Include="Utility.h">
       <Filter>Utility\Core</Filter>
     </ClInclude>
@@ -222,17 +210,38 @@
     <ClInclude Include="WindowController.h">
       <Filter>GPU\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="GLSetUniform.h">
+      <Filter>GPU\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManager.h">
+      <Filter>GPU\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityTank.h">
+      <Filter>Game\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Teams.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ITextureProvider.h">
+      <Filter>GPU\OpenGL</Filter>
+    </ClInclude>
     <ClInclude Include="Renderer2D.h">
       <Filter>GPU\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="IRenderable.h">
-      <Filter>GPU\Renderer</Filter>
+    <ClInclude Include="EntityList.h">
+      <Filter>Game\Entity</Filter>
     </ClInclude>
-    <ClInclude Include="RenderableList.h">
-      <Filter>GPU\Renderer</Filter>
+    <ClInclude Include="GameConstants.h">
+      <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="GLSetUniform.h">
-      <Filter>GPU\OpenGL</Filter>
+    <ClInclude Include="ConstexprArg.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="ExtractArrayDetails.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityTest.h">
+      <Filter>Game\Entity</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

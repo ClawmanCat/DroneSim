@@ -11,9 +11,14 @@
 #include <glm/gtx/vec_swizzle.hpp>
 
 #include <cstdint>
+#include <type_traits>
 
 
 namespace DroneSim {
+    constexpr static long double PI  = M_PI;
+    constexpr static long double TAU = 2 * M_PI;
+
+
     // Guaranteed-size integers & matching floating point typedefs.
     using u8  =  uint8_t;
     using i8  =   int8_t;
@@ -27,6 +32,9 @@ namespace DroneSim {
     using f32 = float;
     using f64 = double;
 
+
+    template <typename T> using no_ref  = std::remove_reference_t<T>;
+    template <typename T> using no_cref = std::remove_const_t<std::remove_reference_t<T>>;
 
 
     // Function Pointer / Pointer to member

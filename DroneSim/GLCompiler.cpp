@@ -29,7 +29,7 @@ namespace DroneSim::GPU {
 
                 glShaderSource(id, 1, &sourceptr, &lengthval);
                 glCompileShader(id);
-                print_gl_errors(true, GL_COMPILE_STATUS, id);
+                DRONESIM_GLC_PRINT_GL_ERRORS(true, GL_COMPILE_STATUS, id, StringUtils::cat("", ext, " shader"));
 
 
                 shaders.push_back(id);
@@ -43,7 +43,7 @@ namespace DroneSim::GPU {
         for (GLuint shader : shaders) glAttachShader(program, shader);
 
         glLinkProgram(program);
-        print_gl_errors(false, GL_LINK_STATUS, program);
+        DRONESIM_GLC_PRINT_GL_ERRORS(false, GL_LINK_STATUS, program, "Shader linking stage");
 
         for (GLuint shader : shaders) {
             glDeleteShader(shader);
@@ -55,29 +55,28 @@ namespace DroneSim::GPU {
     }
 
 
-    void GLCompiler::print_gl_errors(bool shader, GLenum parameter, GLuint id) {
+    void GLCompiler::print_gl_errors_impl(bool shader, GLenum parameter, GLuint id, std::string_view info) {
         GLint status = 0;
         shader ? glGetShaderiv(id, parameter, &status) : glGetProgramiv(id, parameter, &status);
 
         if (status == GL_FALSE) {
-            #ifndef NDEBUG
-                GLint length = 0;
-                shader ? glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length) : glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
+            std::cout << info << ":\n";
 
-                std::string message;
-                message.resize(length);
+            GLint length = 0;
+            shader ? glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length) : glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
 
-                shader ? glGetShaderInfoLog(id, length, &length, &message[0]) : glGetProgramInfoLog(id, length, &length, &message[0]);
+            std::string message;
+            message.resize(length);
 
-                std::cout << "An OpenGL error has occured:\n";
-                std::cout << message;
-            #endif
+            shader ? glGetShaderInfoLog(id, length, &length, &message[0]) : glGetProgramInfoLog(id, length, &length, &message[0]);
+
+            std::cout << "An OpenGL error has occured:\n";
+            std::cout << message;
 
             terminate("An OpenGL error occurred.");
         } else {
-            #ifndef NDEBUG
-                std::cout << "No OpenGL errors detected.\n";
-            #endif
+            std::cout << info << ":\n";
+            std::cout << "No OpenGL errors detected.\n";
         }
     }
 }

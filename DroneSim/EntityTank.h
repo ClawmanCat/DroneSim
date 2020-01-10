@@ -2,40 +2,73 @@
 
 #include "Core.h"
 #include "IEntity.h"
-#include "IRenderable.h"
+#include "TextureManager.h"
+#include "Teams.h"
+#include "ConstexprArg.h"
+#include "Utility.h"
 
-#include <iostream>
+#include <string_view>
 
 namespace DroneSim::Game {
-    class EntityTank : public IEntity<EntityTank>, public Render::IRenderable<EntityTank> {
+    template <Team team> class EntityTank : public IEntity<EntityTank<team>, Traits::ConstexprArg<bool, true>> {
     public:
-        constexpr static float WIDTH    = 25.0f;
-        constexpr static float HEIGHT   = 24.0f;
-        constexpr static u8 FRAME_COUNT = 12;
+        const static inline std::string TEXTURE = (team == Team::RED) ? "tank_red" : "tank_blue";
+
+        constexpr static auto GetObjectLayout(void) {
+            return std::array{
+                DRONESIM_GEN_LAYOUT_OBJ(EntityTank, position),
+                DRONESIM_GEN_LAYOUT_OBJ(EntityTank, rotation),
+                DRONESIM_GEN_LAYOUT_OBJ(EntityTank, frame)
+            };
+        }
+
+        constexpr static Vec2f GetSize(void) {
+            return { 14.0, 18.0 };
+        }
+
+        constexpr static u32 GetFrameCount(void) {
+            return 12;
+        }
+
+        static GLuint GetTextureID(void) {
+            static GLuint id = GPU::TextureManager::instance().getTextureID(TEXTURE);
+            return id;
+        }
 
 
-        EntityTank(Vec2f position, float rotation = 0);
-        EntityTank(EntityTank&& other);
-
-        EntityTank(const EntityTank&) = delete;
-        EntityTank& operator=(const EntityTank&) = delete;
-        EntityTank& operator=(EntityTank&&) = delete;
-
-        ~EntityTank(void);
+        EntityTank(const Vec2f& position, float rotation) : position(position), rotation(rotation), frame(0) {}
 
 
-        void update(void);
+        void update(void) {
+            rotation += 0.0001;
+            if (rotation > TAU) rotation -= TAU;
+
+            u32 frame_base = 0;
+            if (rotation < 0.25 * PI || rotation > TAU - (0.25 * PI)) frame_base = 0; // Right
+            else if (rotation < 0.75 * PI) frame_base = 6; // Down
+            else if (rotation < 1.25 * PI) frame_base = 3; // Right
+            else frame_base = 9; // Up
 
 
-        const Vec2f& GetPosition(void) const;
-        float GetRotation(void) const;
-        const Vec2f& GetSize(void) const;
-        u8 GetFrameCount(void) const;
-        u16 GetTextureID(u8 frame) const;
+            // If already on this base advance to next frame, otherwise switch frames.
+            if (frame - frame_base < 2) ++frame;
+            else frame = frame_base;
+        }
+
+        Vec2f getPosition(void) const {
+            return position;
+        }
+
+        float getRotation(void) const {
+            return rotation;
+        }
+
+        u32 getTextureFrame(void) const {
+            return frame;
+        }
     private:
         Vec2f position;
         float rotation;
-
-        u32 renderID;
+        u32 frame;
     };
 }

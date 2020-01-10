@@ -2,27 +2,18 @@
 
 #include "Core.h"
 #include "WindowController.h"
+#include "EntityList.h"
+#include "GameConstants.h"
 #include "Renderer2D.h"
-#include "StaticPolymorphism.h"
-
-#include "IEntity.h"
-#include "EntityTank.h"
-#include "EntityRocket.h"
-
+#include "EntityTest.h"
 
 #include <vector>
 #include <string>
 #include <algorithm>
 
-#include "GLCompiler.h"
-#include "GLBuffer.h"
-#include "GLProgram.h"
-#include "ILayoutObject.h"
-
 
 namespace DroneSim::Game {
     class GameController {
-        using Entities = Traits::DerivingClassList<IEntity, EntityTank, EntityRocket>;
     public:
         static GameController& instance(void) {
             static GameController instance { };
@@ -33,42 +24,34 @@ namespace DroneSim::Game {
         void start(std::vector<std::string>&& args) {
             this->args = std::move(args);
 
-            // Force initialization.
-            Render::WindowController::instance();
-            Render::Renderer2D::instance();
-
-
-            struct Vertex2D : public GPU::ILayoutObject<Vertex2D> {
-                Vertex2D(Vec2f pos) : position(pos) {}
-
-                Vec2f position;
-
-                static std::vector<GPU::LayoutComponent> GetObjectLayout(void) {
-                    return { DRONESIM_GEN_LAYOUT_OBJ(Vertex2D, position) };
-                }
-            };
-
-            std::vector<Vertex2D> vertices = {
-                { { 0.0f, 0.0f } }, { { 0.2f, 0.0f } }, { { 0.2f, 0.2f } },
-                { { 0.0f, 0.4f } }, { { 0.2f, 0.4f } }, { { 0.2f, 0.6f } }
-            };
-
-            auto program = GPU::GLCompiler::instance().compile("test");
-            auto buffer  = GPU::GLBuffer(GL_TRIANGLES, vertices);
-
-            program.addBuffer(buffer);
+            /*auto program = GPU::GLCompiler::instance().compile("batch");
             
-            float t = 0;
-            while (true) {
-                Render::WindowController::instance().onFrameStart();
-                
-                program.setUniform(t, "t");
+            std::vector data = {
+                EntityTank<Team::BLUE>{ { 10.0f, 10.0f }, 0.0f }
+            };
+
+            auto buffer = GPU::GLBuffer(GL_POINTS, data);
+            program.addBuffer(buffer);
+
+            u32 frame = 0;
+            auto& window = Render::WindowController::instance();
+            while (!window.shouldClose()) {
+                for (auto& elem : data) elem.update();
+                buffer.modify(0, data);
+
+                window.onFrameStart();
+
+
+                program.setUniform(Vec2f{ 1.0 / 1280, 1.0 / 720 }, "window");
+                program.setUniform(EntityTank<Team::RED>::GetSize(), "size");
+                program.setUniform(EntityTank<Team::RED>::GetFrameCount(), "fCount");
                 program.execute();
 
-                Render::WindowController::instance().onFrameEnd();
+                window.onFrameEnd();
 
-                t += 0.001;
-            }
+                if (++frame % 1000 == 0) std::cout << "Frame " << frame << '\n';
+            }*/
+
 
             loop();
         }
@@ -89,15 +72,23 @@ namespace DroneSim::Game {
 
         Entities::PolyContainer<std::vector> entities;
 
+        Render::Renderer2D renderer;
+
+
+        GameController(void) : entities(GetInitialEntities()), renderer(entities) {}
+
 
         void loop(void) {
-            auto& window   = Render::WindowController::instance();
-            auto& renderer = Render::Renderer2D::instance();
+            auto& window = Render::WindowController::instance();
 
             while (!window.shouldClose()) {
                 if (frames < 2000) {
                     // Progress simulation
-                    Traits::PolyContainerForEach(entities, [](auto& entity) { entity.update(); });
+                    Traits::PolyContainerForEach(entities, [](auto& entity, std::size_t n) { entity.update(); });
+
+                    #ifndef NDEBUG
+                        if (frames % 1000 == 0) std::cout << "Frame " << frames << '\n';
+                    #endif
                 } else {
                     // Show results.
                 }
@@ -109,6 +100,45 @@ namespace DroneSim::Game {
 
                 ++frames;
             }
+        }
+
+
+        static Entities::PolyContainer<std::vector> GetInitialEntities(void) {
+            Entities::PolyContainer<std::vector> result;
+
+            constexpr u32   tank_rows     = 12;
+            constexpr float tank_spacing  = 15.0f;
+            constexpr Vec2f corner_offset = EntityTank<Team::BLUE>::GetSize() + Vec2f{ 16.0f, 18.0f };
+
+
+            auto place_color = [&](u32 count, auto& dest, const Vec2f& start, float rotation, const auto& op) {
+                u32 r = 0, c = 0;
+
+                for (u32 i = 0; i < count; ++i) {
+                    dest.push_back({
+                        Vec2f {
+                            op(op(start.x, corner_offset.x), r * tank_spacing),
+                            (start.y - corner_offset.y) - (c * tank_spacing)
+                        }, 
+                        rotation
+                    });
+
+                    if (++r > tank_rows) {
+                        r = 0;
+                        ++c;
+                    }
+                }
+            };
+
+
+            constexpr float w = WINDOW_WIDTH;
+            constexpr float h = WINDOW_HEIGHT;
+
+            place_color(BLUE_TANK_COUNT, Traits::PolyContainerGetT<EntityTank<Team::BLUE>>(result), Vec2f{ 0, h }, 0.0f, [](const auto& a, const auto& b) { return a + b; });
+            place_color(RED_TANK_COUNT,  Traits::PolyContainerGetT<EntityTank<Team::RED>> (result), Vec2f{ w, h }, PI,   [](const auto& a, const auto& b) { return a - b; });
+
+            
+            return result;
         }
     };
 }

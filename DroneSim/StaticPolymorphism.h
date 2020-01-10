@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "ConstexprArg.h"
 
 #include <type_traits>
 #include <tuple>
@@ -25,18 +26,22 @@ namespace DroneSim::Traits {
 
 
     // A list of classes with the given CRTP base class.
-    template <template <typename> typename CRTPBase, typename... Derived> class DerivingClassList {
+    template <template <typename...> typename CRTPBase, typename... Derived> class DerivingClassList {
         public:
             // Produce a container for the given derived classes that fakes polymorphism at compile time.
             template <template <typename...> typename Container, template <typename...> typename Wrapper = NoWrapper>
             class PolyContainer : public std::tuple<Container<decltype(GetWrappedType<Derived, Wrapper>())>...> {
-            
             public:
                 typedef std::tuple<Container<decltype(GetWrappedType<Derived, Wrapper>())>...> self;
                 
                 // Can't use self::tuple since it requires 'typename' with clang-cl (and clang++) but not with MSVC.
                 // (And there is no preprocessor-define that can seperate the two.)
                 using std::tuple<Container<decltype(GetWrappedType<Derived, Wrapper>())>...>::tuple;
+
+
+                PolyContainer(void) = default;
+                PolyContainer(self&& s) : self(std::forward<self>(s)) {}
+
 
                 template <typename... Ts> using container = Container<Ts...>;
                 template <typename... Ts> using wrapper   = Wrapper<Ts...>;
@@ -98,10 +103,11 @@ namespace DroneSim::Traits {
 
 
     // Iterate over the PolyContainer.
-    template <typename Container, typename Pred, std::size_t Next = 0> constexpr static void PolyContainerForEach(Container& container, const Pred& pred) {
+    template <typename Container, typename Pred, std::size_t Next = 0> 
+    constexpr static void PolyContainerForEach(Container& container, const Pred& pred, std::size_t accum = 0) {
         if constexpr (Next < PolyContainerSize<Container>()) {
-            for (auto& elem : PolyContainerGet<Next>(container)) pred(elem);
-            PolyContainerForEach<Container, Pred, Next + 1>(container, pred);
+            for (auto& elem : PolyContainerGet<Next>(container)) pred(elem, accum++);
+            PolyContainerForEach<Container, Pred, Next + 1>(container, pred, accum);
         }
     }
 
@@ -109,8 +115,24 @@ namespace DroneSim::Traits {
     // Iterator over the subcontainers.
     template <typename Container, typename Pred, std::size_t Next = 0> constexpr static void PolyContainerForEachSub(Container& container, const Pred& pred) {
         if constexpr (Next < PolyContainerSize<Container>()) {
-            pred(PolyContainerGet<Next>(container));
+            pred(PolyContainerGet<Next>(container), ConstexprArg<std::size_t, Next>());
             PolyContainerForEachSub<Container, Pred, Next + 1>(container, pred);
         }
+    }
+
+
+    namespace Detail {
+        template <typename In, typename Pred, std::size_t N = 0> constexpr static auto PolyContainerConvertingConstructorImpl(const In& in, const Pred& pred) {
+            auto result = pred(PolyContainerGet<N>(in), N);
+
+            if constexpr (N + 1 >= PolyContainerSize<In>()) return std::tuple{ std::move(result) };
+            else return std::tuple_cat(std::tuple{ std::move(result) }, PolyContainerConvertingConstructorImpl<In, Pred, N + 1>(in, pred));
+        }
+    }
+
+
+    // Construct a PolyContainer of type 'Out' from the result of applying Pred to each element of a PolyContainer of type 'In'.
+    template <typename In, typename Out, typename Pred> constexpr static auto PolyContainerConvertingConstructor(const In& in, const Pred& pred) {
+        return Out(Detail::PolyContainerConvertingConstructorImpl<In, Pred, 0>(in, pred));
     }
 }

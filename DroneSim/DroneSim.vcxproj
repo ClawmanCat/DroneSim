@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -99,6 +102,8 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>$(SolutionDir)FreeImage\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,8 +121,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CLCompiler.cpp" />
-    <ClCompile Include="EntityRocket.cpp" />
-    <ClCompile Include="EntityTank.cpp" />
     <ClCompile Include="explosion.cpp" />
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="game.cpp" />
@@ -138,35 +141,40 @@
     <ClInclude Include="CLCompiler.h" />
     <ClInclude Include="CLGroupSize.h" />
     <ClInclude Include="CLProgram.h" />
+    <ClInclude Include="ConstexprArg.h" />
+    <ClInclude Include="EntityList.h" />
+    <ClInclude Include="EntityTank.h" />
+    <ClInclude Include="EntityTest.h" />
+    <ClInclude Include="ExtractArrayDetails.h" />
     <ClInclude Include="ExtractVectorDetails.h" />
+    <ClInclude Include="GameConstants.h" />
     <ClInclude Include="GLBuffer.h" />
     <ClInclude Include="GLCompiler.h" />
     <ClInclude Include="GLProgram.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="ElementType.h" />
-    <ClInclude Include="EntityRocket.h" />
-    <ClInclude Include="EntityTank.h" />
     <ClInclude Include="explosion.h" />
     <ClInclude Include="FileIO.h" />
     <ClInclude Include="FindTupleType.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="GameController.h" />
     <ClInclude Include="GLSetUniform.h" />
+    <ClInclude Include="ITextureProvider.h" />
+    <ClInclude Include="Renderer2D.h" />
+    <ClInclude Include="Teams.h" />
+    <ClInclude Include="TextureManager.h" />
     <ClInclude Include="IEntity.h" />
     <ClInclude Include="IGPUBuffer.h" />
     <ClInclude Include="IGPUCompiler.h" />
     <ClInclude Include="IGPURunnable.h" />
     <ClInclude Include="ILayoutObject.h" />
     <ClInclude Include="InstantiatesTemplate.h" />
-    <ClInclude Include="IRenderable.h" />
     <ClInclude Include="IsContainer.h" />
     <ClInclude Include="LodePNG.h" />
     <ClInclude Include="Pack.h" />
     <ClInclude Include="particle_beam.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PNGLoader.h" />
-    <ClInclude Include="RenderableList.h" />
-    <ClInclude Include="Renderer2D.h" />
     <ClInclude Include="rocket.h" />
     <ClInclude Include="smoke.h" />
     <ClInclude Include="StaticPolymorphism.h" />

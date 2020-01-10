@@ -1,86 +1,65 @@
 #pragma once
 
 #include "Core.h"
-#include "RenderableList.h"
-#include "VariadicSplitter.h"
+#include "StaticPolymorphism.h"
+#include "EntityList.h"
+#include "GLBuffer.h"
+#include "GLCompiler.h"
+#include "GLProgram.h"
+#include "GameConstants.h"
 
-
-#include <type_traits>
 #include <vector>
-#include <queue>
+
 
 namespace DroneSim::Render {
     class Renderer2D {
     public:
-        template <std::size_t N> struct RenderID {
-            constexpr static std::size_t TypeID = N;
-
-            RenderID(u32 id) : id(id) {}
-
-            u32 id;
-        };
-
-    private:
-        Renderables::PolyContainer<std::vector, PointerWrapper> renderables;
-
-        // There is only one argument, but PolyContainer::container will fail to match if the declaration is not variadic.
-        template <typename... Ts> using RenderIDStorage = RenderID<Traits::PolyContainerFindT<typename Traits::VariadicSplitter<Ts...>::head, decltype(renderables)>()>;
-        Renderables::PolyContainer<std::queue, RenderIDStorage> freeIDs;
-
-    public:
-        // There is only one argument, but PolyContainer::container will fail to match if the declaration is not variadic.
-        template <typename... Ts> using IDTypeFor = RenderIDStorage<std::remove_reference_t<typename Traits::VariadicSplitter<Ts...>::head>>;
+        using RenderID = u32;
 
 
-        static Renderer2D& instance(void) {
-            static Renderer2D instance { };
-            return instance;
+        Renderer2D(const Game::Entities::PolyContainer<std::vector>& entities) : 
+            renderables(entities),
+            buffers(Traits::PolyContainerConvertingConstructor<no_ref<decltype(entities)>, no_ref<decltype(buffers)>>(entities, [](const auto& v, std::size_t n) {
+                return GPU::GLBuffer<typename no_ref<decltype(v)>::value_type>(GL_POINTS, v.size());
+            })),
+            shader(GPU::GLCompiler::instance().compile("batch"))
+        {
+            Traits::PolyContainerForEachSub(buffers, [this](auto& buffer, auto n) {
+                // If the buffer doesn't change, we upload it once. (now)
+                if constexpr (!no_cref<decltype(Traits::PolyContainerGet<decltype(n)::value>(renderables))>::value_type::changes) {
+                    const auto& v = Traits::PolyContainerGet<decltype(n)::value>(renderables);
+                    if (v.size() > 0) buffer.modify(0, v);
+                }
+            });
         }
 
 
         void renderFrame(void) {
+            const static Vec2f WINDOW_SCALE = Vec2f{ 1.0f / Game::WINDOW_WIDTH, 1.0f / Game::WINDOW_HEIGHT };
 
+            // Most of the buffer contents change each frame, so there's not much point in doing a partial update.
+            Traits::PolyContainerForEachSub(buffers, [this](auto& buffer, auto n) {
+                const auto& v = Traits::PolyContainerGet<decltype(n)::value>(renderables);
+                
+                if constexpr (no_cref<decltype(v)>::value_type::changes) buffer.modify(0, v);
+                if (v.size() == 0) return;
+
+
+                auto id = shader.addBuffer(buffer);
+
+                shader.setUniform(WINDOW_SCALE,                                          "window");
+                shader.setUniform(no_ref<decltype(buffer)>::value_type::GetSize(),       "size"  );
+                shader.setUniform(no_ref<decltype(buffer)>::value_type::GetFrameCount(), "fCount");
+
+                shader.execute();
+
+                shader.removeBuffer(id);
+            });
         }
+    private:
+        const Game::Entities::PolyContainer<std::vector>& renderables;
+        Game::Entities::PolyContainer<GPU::GLBuffer> buffers;
 
-
-        template <typename T, typename = std::enable_if_t<Renderables::Contains<T>()>>
-        IDTypeFor<T> add(const T& object) {
-            auto& ids  = Traits::PolyContainerGetT<T>(freeIDs);
-            auto& objs = Traits::PolyContainerGetT<T>(renderables);
-
-            if (ids.size() > 0) {
-                // Use an existing (dead) ID to decrease fragmentation.
-                IDTypeFor<T> id = ids.front();
-                ids.pop();
-
-                objs[id.id] = &object;
-                return id;
-            } else {
-                // Get a new ID.
-                IDTypeFor<T> id = objs.size();
-
-                objs.push_back(&object);
-                return id;
-            }
-        }
-
-
-        template <typename T, typename = std::enable_if_t<Renderables::Contains<T>()>>
-        void remove(IDTypeFor<T> id) {
-            auto& ids  = Traits::PolyContainerGet<decltype(id)::TypeID>(freeIDs);
-            auto& objs = Traits::PolyContainerGet<decltype(id)::TypeID>(renderables);
-
-            objs[id.id] = nullptr;
-            ids.push(id);
-        }
-
-
-        // Since we keep a pointer to the object, we need to update the object pointed to when it is moved.
-        template <typename T, typename = std::enable_if_t<Renderables::Contains<T>()>>
-        void update(IDTypeFor<T> id, const T& newObject) {
-            auto& objs = Traits::PolyContainerGet<decltype(id)::TypeID>(renderables);
-
-            objs[id.id] = &newObject;
-        }
+        GPU::GLProgram shader;
     };
 }

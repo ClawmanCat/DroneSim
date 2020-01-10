@@ -1,12 +1,12 @@
 #version 410
 
 in vec2 frag_position;
-uniform float t;
+in vec2 frag_uv;
 
-out vec3 color;
+uniform sampler2D texture_sampler;
+
+out vec4 color;
 
 void main() {
-     vec2 fp = frag_position;
-
-     color = vec3(sin(fp.x * t), cos(fp.y *t), -sin((fp.x + fp.y) / 2.0 * t));
+     color = texture(texture_sampler, frag_uv);
 }

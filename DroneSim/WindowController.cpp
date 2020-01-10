@@ -4,7 +4,7 @@
 
 namespace DroneSim::Render {
     WindowController& WindowController::instance(void) {
-        static WindowController instance{ WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT };
+        static WindowController instance{ };
         return instance;
     }
 
@@ -27,9 +27,12 @@ namespace DroneSim::Render {
         SDL_GL_SetSwapInterval(0);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, SDL_TRUE);
 
-        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+        glClearColor(0.35f, 0.35f, 0.35f, 1.0f);
 
         glEnableClientState(GL_VERTEX_ARRAY);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     }
 
 

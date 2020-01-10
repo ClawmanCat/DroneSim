@@ -8,4 +8,9 @@ namespace DroneSim::Utility {
         std::swap(*where, v.back());
         v.pop_back();
     }
+
+
+    template <typename T> inline T scale(const T& v, const Vec2<T>& oldrange, const Vec2<T>& newrange) {
+        return (((v - oldrange.x) * (newrange.y - newrange.x)) / (oldrange.y - oldrange.x)) + newrange.x;
+    }
 }

@@ -78,12 +78,18 @@ namespace DroneSim::GPU {
             }
         }
 
-        template <typename T> GLuint addBuffer(const BufferType<T>& buffer) {
-            buffers.push_back({ buffer.getVAO(), buffer.getVBO(), buffer.getType(), buffer.getSize(), buffer.getAttribLoader() });
-            return buffer.getVAO();
-        }
+        // IntelliSense fails to correctly parse this method so just create a fake one when it is parsing.
+        #ifdef __INTELLISENSE__
+            template <typename T> GLuint addBuffer(const T& buffer) {}
+        #else
+            template <typename T> GLuint addBuffer(const BufferType<T>& buffer) {
+                buffers.push_back({ buffer.getVAO(), buffer.getVBO(), buffer.getType(), buffer.getSize(), buffer.getAttribLoader() });
+                return buffer.getVAO();
+            }
+        #endif
 
         void removeBuffer(GLuint id) {
+            // Assume not many buffers.
             Utility::swap_erase(buffers, std::find_if(buffers.begin(), buffers.end(), [&](const BufferData& bd) { return bd.vao == id; }));
         }
 

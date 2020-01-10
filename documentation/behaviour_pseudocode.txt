@@ -1,0 +1,39 @@
+GameController:
+
+function init() {
+	for i in [0, TANK_COUNT] {
+	   tanks.push(new Tank(Blue, GetNextTankPos(Blue, i)));
+	   tanks.push(new Tank(Red,  GetNextTankPos(Red,  i)));
+	}
+	
+	for i in [0, 2] {
+		beams.push(new ParticleBeam(GetNextBeamPos(i)));
+	}
+}
+
+
+function loop() {
+	for tank in tanks {
+		if (tank.active) {
+			for other in tanks {
+				if (other == tank) continue;
+				
+				direction = tank.position - other.position;
+				if (length(direction) < tank.radius + other.radius) tank.push_away(direction);
+			}
+		}
+		
+		tank.update();
+		
+		
+		if (tank.rocket_ready) {
+			enemy = closest_to(tank)
+			rockets.push(new Rocket(tank.color, target.position - tank.position));
+			
+			tank.reload_rocket();
+		}
+		
+		
+		for (rocket in rockets) 
+	}
+}
