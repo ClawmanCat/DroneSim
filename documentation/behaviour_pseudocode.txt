@@ -1,39 +1,32 @@
-GameController:
-
-function init() {
-	for i in [0, TANK_COUNT] {
-	   tanks.push(new Tank(Blue, GetNextTankPos(Blue, i)));
-	   tanks.push(new Tank(Red,  GetNextTankPos(Red,  i)));
-	}
+void partition_transition(object, old, new) {
+	if (old == new) return;
 	
-	for i in [0, 2] {
-		beams.push(new ParticleBeam(GetNextBeamPos(i)));
-	}
-}
-
-
-function loop() {
-	for tank in tanks {
-		if (tank.active) {
-			for other in tanks {
-				if (other == tank) continue;
-				
-				direction = tank.position - other.position;
-				if (length(direction) < tank.radius + other.radius) tank.push_away(direction);
+	if (new > old) {
+		swap(object, old.back());
+		
+		next = old + 1;
+		do {
+			if (!next.empty()) {
+				swap(object, next.back());
 			}
-		}
-		
-		tank.update();
-		
-		
-		if (tank.rocket_ready) {
-			enemy = closest_to(tank)
-			rockets.push(new Rocket(tank.color, target.position - tank.position));
 			
-			tank.reload_rocket();
-		}
+			next.offset--;
+			next++;
+		} while (next <= new);
+	} else {
+		swap(object, old.front());
 		
-		
-		for (rocket in rockets) 
+		next = old - 1;
+		do {
+			if (!next.empty()) {
+				swap(object, next.front());
+			}
+			
+			if (next != new) next.offset++;
+			next--;
+		} while (next >= new);
 	}
 }
+
+
+

@@ -12,11 +12,26 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <chrono>
 
 
 namespace DroneSim {
+    // Constants
     constexpr static long double PI  = M_PI;
     constexpr static long double TAU = 2 * M_PI;
+
+
+    // Chrono
+    using namespace std::chrono_literals;
+
+    using std::chrono::steady_clock;
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+
+    using std::chrono::nanoseconds;
+    using std::chrono::microseconds;
+    using std::chrono::milliseconds;
+    using std::chrono::seconds;
 
 
     // Guaranteed-size integers & matching floating point typedefs.

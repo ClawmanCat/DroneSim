@@ -102,16 +102,7 @@
     <ClInclude Include="StringUtils.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="InstantiatesTemplate.h">
-      <Filter>Utility\Traits</Filter>
-    </ClInclude>
     <ClInclude Include="Pack.h">
-      <Filter>Utility\Traits</Filter>
-    </ClInclude>
-    <ClInclude Include="IsContainer.h">
-      <Filter>Utility\Traits</Filter>
-    </ClInclude>
-    <ClInclude Include="ElementType.h">
       <Filter>Utility\Traits</Filter>
     </ClInclude>
     <ClInclude Include="GameController.h">
@@ -151,12 +142,6 @@
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="VariadicSplitter.h">
-      <Filter>Utility\Traits</Filter>
-    </ClInclude>
-    <ClInclude Include="FindTupleType.h">
-      <Filter>Utility\Traits</Filter>
-    </ClInclude>
-    <ClInclude Include="StaticPolymorphism.h">
       <Filter>Utility\Traits</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
@@ -240,8 +225,35 @@
     <ClInclude Include="ExtractArrayDetails.h">
       <Filter>Utility\Traits</Filter>
     </ClInclude>
-    <ClInclude Include="EntityTest.h">
+    <ClInclude Include="EntityRocket.h">
       <Filter>Game\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityBackground.h">
+      <Filter>Game\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityRotating.h">
+      <Filter>Game\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="EntitySmoke.h">
+      <Filter>Game\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityExplosion.h">
+      <Filter>Game\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticPolymorphism.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="PolyVector.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="TakesOverload.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="PolyContainer.h">
+      <Filter>Utility\Traits</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

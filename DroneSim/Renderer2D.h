@@ -17,17 +17,18 @@ namespace DroneSim::Render {
         using RenderID = u32;
 
 
-        Renderer2D(const Game::Entities::PolyContainer<std::vector>& entities) : 
+        Renderer2D(const Game::Entities::PolyVector<>& entities) : 
             renderables(entities),
-            buffers(Traits::PolyContainerConvertingConstructor<no_ref<decltype(entities)>, no_ref<decltype(buffers)>>(entities, [](const auto& v, std::size_t n) {
+            buffers(entities.convert<decltype(buffers)>([](const auto& v) {
                 return GPU::GLBuffer<typename no_ref<decltype(v)>::value_type>(GL_POINTS, v.size());
             })),
             shader(GPU::GLCompiler::instance().compile("batch"))
         {
-            Traits::PolyContainerForEachSub(buffers, [this](auto& buffer, auto n) {
+            buffers.forEachSub([this](auto& buffer, auto n) {
                 // If the buffer doesn't change, we upload it once. (now)
-                if constexpr (!no_cref<decltype(Traits::PolyContainerGet<decltype(n)::value>(renderables))>::value_type::changes) {
-                    const auto& v = Traits::PolyContainerGet<decltype(n)::value>(renderables);
+                const auto& v = renderables.get<decltype(n)::value>();
+
+                if constexpr (!no_cref<decltype(v)>::value_type::MayChange()) {
                     if (v.size() > 0) buffer.modify(0, v);
                 }
             });
@@ -38,10 +39,10 @@ namespace DroneSim::Render {
             const static Vec2f WINDOW_SCALE = Vec2f{ 1.0f / Game::WINDOW_WIDTH, 1.0f / Game::WINDOW_HEIGHT };
 
             // Most of the buffer contents change each frame, so there's not much point in doing a partial update.
-            Traits::PolyContainerForEachSub(buffers, [this](auto& buffer, auto n) {
-                const auto& v = Traits::PolyContainerGet<decltype(n)::value>(renderables);
+            buffers.forEachSub([this](auto& buffer, auto n) {
+                const auto& v = renderables.get<decltype(n)::value>();
                 
-                if constexpr (no_cref<decltype(v)>::value_type::changes) buffer.modify(0, v);
+                if constexpr (no_cref<decltype(v)>::value_type::MayChange()) buffer.modify(0, v);
                 if (v.size() == 0) return;
 
 

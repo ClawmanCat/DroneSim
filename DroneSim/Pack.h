@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core.h"
-#include "VariadicStorage.h"
 
 namespace DroneSim::Traits {
     template <typename... Args> class Pack {
@@ -19,6 +18,9 @@ namespace DroneSim::Traits {
         template <typename... Ts> constexpr static bool ContainsAll(void) {
             return ContainsAllImpl<Ts...>();
         }
+
+
+        template <typename T> using Prepend = Pack<T, Args...>;
     private:
         template <typename T, typename Head, typename... Tail> constexpr static bool ContainsImpl(void) {
             if constexpr (std::is_same_v<T, Head>) return true;

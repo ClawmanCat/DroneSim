@@ -5,7 +5,8 @@
 #include "EntityList.h"
 #include "GameConstants.h"
 #include "Renderer2D.h"
-#include "EntityTest.h"
+#include "Timer.h"
+#include "PolyVector.h"
 
 #include <vector>
 #include <string>
@@ -24,35 +25,6 @@ namespace DroneSim::Game {
         void start(std::vector<std::string>&& args) {
             this->args = std::move(args);
 
-            /*auto program = GPU::GLCompiler::instance().compile("batch");
-            
-            std::vector data = {
-                EntityTank<Team::BLUE>{ { 10.0f, 10.0f }, 0.0f }
-            };
-
-            auto buffer = GPU::GLBuffer(GL_POINTS, data);
-            program.addBuffer(buffer);
-
-            u32 frame = 0;
-            auto& window = Render::WindowController::instance();
-            while (!window.shouldClose()) {
-                for (auto& elem : data) elem.update();
-                buffer.modify(0, data);
-
-                window.onFrameStart();
-
-
-                program.setUniform(Vec2f{ 1.0 / 1280, 1.0 / 720 }, "window");
-                program.setUniform(EntityTank<Team::RED>::GetSize(), "size");
-                program.setUniform(EntityTank<Team::RED>::GetFrameCount(), "fCount");
-                program.execute();
-
-                window.onFrameEnd();
-
-                if (++frame % 1000 == 0) std::cout << "Frame " << frame << '\n';
-            }*/
-
-
             loop();
         }
 
@@ -67,30 +39,56 @@ namespace DroneSim::Game {
             Utility::swap_erase(v, std::find(v.begin(), v.end(), entity));
         }
     private:
+        constexpr static milliseconds reference_time = 73'520ms;
+        Utility::Timer timer;
+
         std::vector<std::string> args;
         u64 frames = 0;
 
-        Entities::PolyContainer<std::vector> entities;
+        Entities::PolyVector<> entities;
 
         Render::Renderer2D renderer;
 
 
-        GameController(void) : entities(GetInitialEntities()), renderer(entities) {}
+        GameController(void) : timer(), entities(GetInitialEntities()), renderer(entities) {}
 
 
+        void tick(void) {
+            // Perform collision detection on tanks
+            // TODO: Proximity-friendly storage. (quad-tree or such)
+
+            // Update entities.
+            entities.forEach([](auto& entity, std::size_t n) { 
+                entity.update(); 
+            });
+
+
+            // Remove finished explosions.
+            if (entities.size<EntityExplosion>() > 0) {
+                entities.erase<EntityExplosion>(std::remove_if(
+                    entities.begin<EntityExplosion>(), 
+                    entities.end<EntityExplosion>(), // <-- TODO: Only search until last done explosion. (Vector is sorted)
+                    [](const EntityExplosion& e) { return e.isFinished(); }
+                ));
+            }
+        }
+
+
+        // Main simulation update loop.
         void loop(void) {
             auto& window = Render::WindowController::instance();
 
             while (!window.shouldClose()) {
-                if (frames < 2000) {
-                    // Progress simulation
-                    Traits::PolyContainerForEach(entities, [](auto& entity, std::size_t n) { entity.update(); });
-
-                    #ifndef NDEBUG
-                        if (frames % 1000 == 0) std::cout << "Frame " << frames << '\n';
-                    #endif
+                if (frames < SIMULATED_FRAMES) {
+                    tick();
                 } else {
                     // Show results.
+                    if (frames == SIMULATED_FRAMES) {
+                        milliseconds result = timer.elapsed();
+
+                        std::cout << "Simulation took " << result.count() << "ms.\n";
+                        std::cout << "% of original runtime: " << (100 * ((float)result.count()) / reference_time.count()) << "%\n";
+                    }
                 }
 
                 // Render the simulation.
@@ -103,8 +101,9 @@ namespace DroneSim::Game {
         }
 
 
-        static Entities::PolyContainer<std::vector> GetInitialEntities(void) {
-            Entities::PolyContainer<std::vector> result;
+        static Entities::PolyVector<> GetInitialEntities(void) {
+            Entities::PolyVector<> result;
+            result.push_back<EntityBackground>(EntityBackground());
 
             constexpr u32   tank_rows     = 12;
             constexpr float tank_spacing  = 15.0f;
@@ -134,8 +133,8 @@ namespace DroneSim::Game {
             constexpr float w = WINDOW_WIDTH;
             constexpr float h = WINDOW_HEIGHT;
 
-            place_color(BLUE_TANK_COUNT, Traits::PolyContainerGetT<EntityTank<Team::BLUE>>(result), Vec2f{ 0, h }, 0.0f, [](const auto& a, const auto& b) { return a + b; });
-            place_color(RED_TANK_COUNT,  Traits::PolyContainerGetT<EntityTank<Team::RED>> (result), Vec2f{ w, h }, PI,   [](const auto& a, const auto& b) { return a - b; });
+            place_color(BLUE_TANK_COUNT, result.getT<EntityTank<Team::BLUE>>(), Vec2f{ 0, h }, 0.0f, [](const auto& a, const auto& b) { return a + b; });
+            place_color(RED_TANK_COUNT,  result.getT<EntityTank<Team::RED>> (), Vec2f{ w, h }, PI,   [](const auto& a, const auto& b) { return a - b; });
 
             
             return result;

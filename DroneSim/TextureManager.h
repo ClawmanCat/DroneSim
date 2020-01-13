@@ -28,7 +28,7 @@ namespace DroneSim::GPU {
         }
 
         
-        TextureID getTextureID(const std::string& name) {
+        TextureID getTextureID(std::string_view name) {
             std::string path = StringUtils::cat(Paths::PATH_TEXTURES, name, ".png");
 
             // Check if texture is already loaded.
