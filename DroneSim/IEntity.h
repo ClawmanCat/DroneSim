@@ -12,6 +12,9 @@
 namespace DroneSim::Game {
     template <typename D> class IEntity : public GPU::ILayoutObject<D>, public GPU::ITextureProvider<D> {
     public:
+        constexpr static bool is_tank_tag = false;
+
+
         constexpr static bool             MayChange(void)        { return D::MayChange();        }
         constexpr static Vec2f            GetSize(void)          { return D::GetSize();          }
         constexpr static u32              GetFrameCount(void)    { return D::GetFrameCount();    }

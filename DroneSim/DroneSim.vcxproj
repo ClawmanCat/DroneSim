@@ -163,6 +163,7 @@
     <ClInclude Include="EntityBackground.h" />
     <ClInclude Include="ITextureProvider.h" />
     <ClInclude Include="PolyContainer.h" />
+    <ClInclude Include="PolyContainerHelpers.h" />
     <ClInclude Include="PolyVector.h" />
     <ClInclude Include="Renderer2D.h" />
     <ClInclude Include="StaticPolymorphism.h" />

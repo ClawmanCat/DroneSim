@@ -5,17 +5,13 @@
 #include "VariadicSplitter.h"
 #include "ConstexprArg.h"
 #include "TakesOverload.h"
+#include "PolyContainerHelpers.h"
 
 #include <tuple>
 #include <functional>
 
 
 namespace DroneSim::Traits {
-    template <typename...> struct NoWrapper {};
-    template <template <typename...> typename Wrapper, typename T> using WrappedType = std::conditional_t<std::is_same_v<Wrapper<T>, NoWrapper<T>>, T, Wrapper<T>>;
-
-
-
     template <
         template <typename...> typename Container, 
         template <typename...> typename Wrapper = NoWrapper,
@@ -148,21 +144,38 @@ namespace DroneSim::Traits {
         }
 
 
-        // Create a new PolyContainer, where each subcontainer is included only if pred(container) returns true.
+        // Create a new PolyContainer, where each subcontainer is included only if Pred returns true.
         // This method only creates a new view on the current container, it does not copy the elements.
-        // The predicate must be a constant expression.
-        template <typename Pred> constexpr auto select(const Pred& pred) {
-            return PolyContainer<Container, Wrapper>(selectImpl(pred));
+        // The predicate class must have a constexpr static method with signature 
+        // template <typename container_t, std::size_t index> bool select(void)
+        template <typename Pred, template <typename...> typename CC = Container, template <typename...> typename WW = Wrapper> constexpr auto select(void) {
+            auto t = selectImpl<Pred>();
+
+            using container_t = typename TupleInfo<decltype(t)>::type
+                ::template Apply<RemoveReference>::type
+                ::template Apply<ToValueType>::type
+                ::template Apply<ToRefContainer>::type;
+
+            return container_t(std::move(t));
         }
 
 
-        // Create a new PolyContainer, where each subcontainer is included only if pred(container) returns true. (const)
+        // Create a new PolyContainer, where each subcontainer is included only if Pred returns true. (const)
         // This method only creates a new view on the current container, it does not copy the elements.
-        // The predicate must be a constant expression.
-        template <typename Pred> constexpr auto select(const Pred& pred) const {
-            return PolyContainer<Container, Wrapper>(selectImpl(pred));
+        // The predicate class must have a constexpr static method with signature 
+        // template <typename container_t, std::size_t index> bool select(void)
+        template <typename Pred> constexpr auto select(void) const {
+            auto t = selectImpl<Pred>();
+
+            using container_t = typename TupleInfo<decltype(t)>::type
+                ::template Apply<RemoveReference>::type
+                ::template Apply<ToValueType>::type
+                ::template Apply<ToCRefContainer>::type;
+
+            return container_t(std::move(t));
         }
     private:
+        // Implementation details for PolyContainer::convert:
         template <typename Pred, std::size_t N = 0> constexpr auto convertImpl(const Pred& pred) const {
             auto call_pred = [&]() constexpr {
                 if constexpr (takes_overload_v<Pred, decltype(get<N>())>) return pred(get<N>());
@@ -170,29 +183,45 @@ namespace DroneSim::Traits {
             };
 
             if constexpr (Size == 0) return std::tuple { };
-
-            if constexpr (N + 1 == Size) return std::tuple{ call_pred() };
+            else if constexpr (N + 1 == Size) return std::tuple{ call_pred() };
             else return std::tuple_cat(std::tuple{ call_pred() }, convertImpl<Pred, N + 1>(pred));
         }
 
 
-        template <typename Pred, std::size_t N = 0> constexpr auto selectImpl(const Pred& pred) {
-            if constexpr (Size == 0) return std::tuple{};
+        // Implementation details for PolyContainer::select:
+        template <typename> struct TupleInfo {};
+        template <typename... Xs> struct TupleInfo<std::tuple<Xs...>> { using type = Pack<Xs...>; };
 
-            if constexpr (N + 1 == Size) {
-                if constexpr (pred(get<N>())) return std::tuple{ std::ref(get<N>()) };
-                else return std::tuple_cat(std::tuple{ std::ref(get<N>()) }, selectImpl<Pred, N + 1>(pred));
-            } 
+        template <typename... Xs> using RemoveReference    = Pack<std::remove_reference_t<Xs>...>;
+        template <typename... Xs> using ToValueType        = Pack<typename Xs::value_type...>;
+        template <typename... Xs> using ToRefSubcontainer  = Container<Xs...>&;
+        template <typename... Xs> using ToCRefSubcontainer = const Container<Xs...>&;
+
+        template <typename... Xs> using ToRefContainer  = PolyContainer<ToRefSubcontainer,  Wrapper, Xs...>;
+        template <typename... Xs> using ToCRefContainer = PolyContainer<ToCRefSubcontainer, Wrapper, Xs...>;
+
+
+        template <typename Pred, std::size_t N = 0> constexpr auto selectImpl(void) {
+            auto call_pred = [&]() constexpr {
+                if constexpr (Pred::template select<TypeAt<N>, N>()) return std::tie(get<N>());
+                else return std::tuple{};
+            };
+
+            if constexpr (Size == 0) return std::tuple{};
+            else if constexpr (N + 1 == Size) return call_pred();
+            else return std::tuple_cat(call_pred(), selectImpl<Pred, N + 1>());
         }
 
 
-        template <typename Pred, std::size_t N = 0> constexpr auto selectImpl(const Pred& pred) const {
-            if constexpr (Size == 0) return std::tuple{};
+        template <typename Pred, std::size_t N = 0> constexpr auto selectImpl(void) const {
+            auto call_pred = [&]() constexpr {
+                if constexpr (Pred::template select<TypeAt<N>, N>()) return std::tie(get<N>());
+                else return std::tuple{};
+            };
 
-            if constexpr (N + 1 == Size) {
-                if constexpr (pred(get<N>())) return std::tuple{ std::cref(get<N>()) };
-                else return std::tuple_cat(std::tuple{ std::cref(get<N>()) }, selectImpl<Pred, N + 1>(pred));
-            }
+            if constexpr (Size == 0) return std::tuple{};
+            else if constexpr (N + 1 == Size) return call_pred();
+            else return std::tuple_cat(call_pred(), selectImpl<Pred, N + 1>());
         }
     };
 }

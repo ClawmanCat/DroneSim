@@ -13,6 +13,7 @@ namespace DroneSim::Game {
     constexpr static u32 BEAM_DAMAGE                    = 50;
 
     constexpr static float TANK_SPEED                   = 1.5;
+    constexpr static float TANK_MAX_SPEED               = 1.5;
 
     constexpr static u32 SIMULATED_FRAMES               = 2000;
     constexpr static u32 HEALTHBAR_SIZE_X               = 70;

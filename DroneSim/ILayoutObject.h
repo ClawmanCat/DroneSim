@@ -8,6 +8,11 @@
 
 #include <vector>
 
+// We use offsetof on classes with members split between base and derived class,
+// making it a non-standard layout type.
+// While this is UB in C++14, we are using C++17, so it is conditionally supported.
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+
 
 #define DRONESIM_GEN_LAYOUT_OBJ(Class, Member)                                                                  \
 DroneSim::GPU::LayoutComponent {                                                                                \

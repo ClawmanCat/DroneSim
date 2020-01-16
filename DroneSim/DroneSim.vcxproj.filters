@@ -255,6 +255,9 @@
     <ClInclude Include="PolyContainer.h">
       <Filter>Utility\Traits</Filter>
     </ClInclude>
+    <ClInclude Include="PolyContainerHelpers.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\copy_to_build\kernels\test.cl">

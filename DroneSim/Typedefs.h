@@ -10,9 +10,16 @@
 #include <glm/matrix.hpp>
 #include <glm/gtx/vec_swizzle.hpp>
 
+#include <boost/preprocessor.hpp>
+
 #include <cstdint>
 #include <type_traits>
 #include <chrono>
+
+
+#define DRONESIM_PASTE_IMPL(Rep, Count, Data) (Data)
+#define DRONESIM_PASTE(Count, Contents) BOOST_PP_SEQ_ENUM(BOOST_PP_REPEAT(Count, DRONESIM_PASTE_IMPL, Contents))
+
 
 
 namespace DroneSim {
@@ -47,7 +54,10 @@ namespace DroneSim {
     using f32 = float;
     using f64 = double;
 
+    
 
+    template <typename T> using ref     = std::reference_wrapper<T>;
+    template <typename T> using cref    = std::reference_wrapper<const T>;
     template <typename T> using no_ref  = std::remove_reference_t<T>;
     template <typename T> using no_cref = std::remove_const_t<std::remove_reference_t<T>>;
 
@@ -106,6 +116,12 @@ namespace DroneSim {
                                                                        \
     using Vec##Size##f  = Vec##Size<f32>;                              \
     using Vec##Size##d  = Vec##Size<f64>;                              \
+                                                                       \
+    constexpr static Vec##Size##f ZVec##Size##f                        \
+        = { DRONESIM_PASTE(Size, 0.0f) };                              \
+                                                                       \
+    constexpr static Vec##Size##f OVec##Size##f                        \
+        = { DRONESIM_PASTE(Size, 1.0f) };                              \
                                                                        \
                                                                        \
     template <typename T> using Mat##Size = glm::mat<Size, Size, T>;   \

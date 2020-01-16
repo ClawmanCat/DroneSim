@@ -39,6 +39,13 @@ namespace DroneSim::Game {
             Utility::swap_erase(v, std::find(v.begin(), v.end(), entity));
         }
     private:
+        struct TankSelector {
+            template <typename C, std::size_t N> constexpr static bool select(void) {
+                return C::value_type::is_tank_tag;
+            }
+        };
+
+
         constexpr static milliseconds reference_time = 73'520ms;
         Utility::Timer timer;
 
@@ -56,6 +63,25 @@ namespace DroneSim::Game {
         void tick(void) {
             // Perform collision detection on tanks
             // TODO: Proximity-friendly storage. (quad-tree or such)
+            auto tanks = entities.select<TankSelector>();
+
+            tanks.forEach([&](auto& tank, std::size_t ti) {
+                tanks.forEach([&](auto& other, std::size_t oi) {
+                    if (std::is_same_v<decltype(tank), decltype(other)> && ti == oi) return;
+
+                    Vec2f direction  = tank.getPosition() - other.getPosition();
+                    float distanceSq = glm::dot(direction, direction);
+                    
+                    float radiusSq = 2 * no_ref<decltype(tank)>::GetRadius();
+                    radiusSq *= radiusSq;
+
+
+                    if (distanceSq < radiusSq) {
+
+                    }
+                });
+            });
+
 
             // Update entities.
             entities.forEach([](auto& entity, std::size_t n) { 
@@ -64,13 +90,14 @@ namespace DroneSim::Game {
 
 
             // Remove finished explosions.
-            if (entities.size<EntityExplosion>() > 0) {
-                entities.erase<EntityExplosion>(std::remove_if(
+            entities.erase<EntityExplosion>(
+                std::remove_if(
                     entities.begin<EntityExplosion>(), 
                     entities.end<EntityExplosion>(), // <-- TODO: Only search until last done explosion. (Vector is sorted)
                     [](const EntityExplosion& e) { return e.isFinished(); }
-                ));
-            }
+                ), 
+                entities.end<EntityExplosion>()
+            );
         }
 
 
@@ -81,13 +108,15 @@ namespace DroneSim::Game {
             while (!window.shouldClose()) {
                 if (frames < SIMULATED_FRAMES) {
                     tick();
+
+                    if (frames % 100 == 0) std::cout << "Frame " << frames << " (" << timer.elapsed().count() << "ms)" << "\n";
                 } else {
                     // Show results.
                     if (frames == SIMULATED_FRAMES) {
                         milliseconds result = timer.elapsed();
 
                         std::cout << "Simulation took " << result.count() << "ms.\n";
-                        std::cout << "% of original runtime: " << (100 * ((float)result.count()) / reference_time.count()) << "%\n";
+                        std::cout << "% of original runtime: " << (100 * ((float) result.count()) / reference_time.count()) << "%\n";
                     }
                 }
 
