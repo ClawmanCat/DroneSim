@@ -1,6 +1,10 @@
 @echo off
 
 
+if not exist "%~dp0\debug\" mkdir %~dp0\debug 
+if not exist "%~dp0\release\" mkdir %~dp0\release
+
+
 echo Running conan for debug configuration...
 
 set CONAN_TRACE_FILE=%~dp0debug\conan_trace.log
