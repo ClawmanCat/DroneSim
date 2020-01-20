@@ -7,6 +7,7 @@
 #include "Renderer2D.h"
 #include "Timer.h"
 #include "PolyVector.h"
+#include "EntitySelectors.h"
 
 #include <vector>
 #include <string>
@@ -35,17 +36,38 @@ namespace DroneSim::Game {
 
 
         template <typename T, typename = std::enable_if_t<Entities::Contains<T>()>> void removeEntity(const T& entity) {
-            auto& v = Traits::PolyContainerGetT<T>(entities)
-            Utility::swap_erase(v, std::find(v.begin(), v.end(), entity));
+            auto& v = Traits::PolyContainerGetT<T>(entities);
+            
+            std::size_t index = &entity - &v.data[0];
+            Utility::swap_erase(v, v.begin() + index);
         }
-    private:
-        struct TankSelector {
-            template <typename C, std::size_t N> constexpr static bool select(void) {
-                return C::value_type::is_tank_tag;
+
+
+        template <typename Tank> const auto& findClosestEnemy(const Tank& tank) const {
+            const auto& enemies = entities.select<EnemyTankSelector<Tank::GetTeam()>>().template get<0>();
+
+            std::size_t closest = 0;
+            float distanceSq    = std::numeric_limits<float>::infinity();
+
+            for (std::size_t i = 0; i < enemies.size(); ++i) {
+                Vec2f d   = tank.getPosition() - enemies[i].getPosition();
+                float dsq = glm::dot(d, d);
+
+                if (dsq < distanceSq) {
+                    closest = i;
+                    distanceSq = dsq;
+                }
             }
+
+            return enemies[closest];
         };
 
 
+        auto& getEntities(void) { return entities; }
+        const auto& getEntities(void) const { return entities; }
+
+        u32 getFrameCount(void) const { return frames; }
+    private:
         constexpr static milliseconds reference_time = 73'520ms;
         Utility::Timer timer;
 
@@ -61,28 +83,6 @@ namespace DroneSim::Game {
 
 
         void tick(void) {
-            // Perform collision detection on tanks
-            // TODO: Proximity-friendly storage. (quad-tree or such)
-            auto tanks = entities.select<TankSelector>();
-
-            tanks.forEach([&](auto& tank, std::size_t ti) {
-                tanks.forEach([&](auto& other, std::size_t oi) {
-                    if (std::is_same_v<decltype(tank), decltype(other)> && ti == oi) return;
-
-                    Vec2f direction  = tank.getPosition() - other.getPosition();
-                    float distanceSq = glm::dot(direction, direction);
-                    
-                    float radiusSq = 2 * no_ref<decltype(tank)>::GetRadius();
-                    radiusSq *= radiusSq;
-
-
-                    if (distanceSq < radiusSq) {
-
-                    }
-                });
-            });
-
-
             // Update entities.
             entities.forEach([](auto& entity, std::size_t n) { 
                 entity.update(); 
@@ -90,6 +90,7 @@ namespace DroneSim::Game {
 
 
             // Remove finished explosions.
+            // TODO: Move to EntityExplosion.cpp
             entities.erase<EntityExplosion>(
                 std::remove_if(
                     entities.begin<EntityExplosion>(), 
@@ -98,6 +99,21 @@ namespace DroneSim::Game {
                 ), 
                 entities.end<EntityExplosion>()
             );
+            
+            
+            // Remove exploded rockets.
+            // TODO: Move to EntityRocket.cpp
+            auto rockets = entities.select<RocketSelector>();
+            rockets.forEachSub([](auto& container) {
+                container.erase(
+                    std::remove_if(
+                        container.begin(),
+                        container.end(),
+                        [](const auto& rocket) { return !rocket.alive(); }
+                    ),
+                    container.end()
+                );
+            });
         }
 
 
@@ -136,19 +152,19 @@ namespace DroneSim::Game {
 
             constexpr u32   tank_rows     = 12;
             constexpr float tank_spacing  = 15.0f;
-            constexpr Vec2f corner_offset = EntityTank<Team::BLUE>::GetSize() + Vec2f{ 16.0f, 18.0f };
+            constexpr Vec2f tank_offset   = Vec2f{ 17.0f, WINDOW_HEIGHT - HEALTHBAR_HEIGHT - 18.0f };
 
 
-            auto place_color = [&](u32 count, auto& dest, const Vec2f& start, float rotation, const auto& op) {
+            auto place_color = [&](u32 count, auto& dest, const Vec2f& target, bool invert) {
+                const Vec2f begin     = invert ? Vec2f{ WINDOW_WIDTH - tank_offset.x, tank_offset.y } : tank_offset;
+                const Vec2f direction = invert ? Vec2f{ -1.0, -1.0 } : Vec2f{ 1.0, -1.0 };
+
                 u32 r = 0, c = 0;
 
                 for (u32 i = 0; i < count; ++i) {
                     dest.push_back({
-                        Vec2f {
-                            op(op(start.x, corner_offset.x), r * tank_spacing),
-                            (start.y - corner_offset.y) - (c * tank_spacing)
-                        }, 
-                        rotation
+                        begin + (Vec2f{ r, c } * tank_spacing * direction),
+                        target
                     });
 
                     if (++r > tank_rows) {
@@ -159,11 +175,15 @@ namespace DroneSim::Game {
             };
 
 
-            constexpr float w = WINDOW_WIDTH;
-            constexpr float h = WINDOW_HEIGHT;
+            place_color(BLUE_TANK_COUNT, result.getT<EntityTank<Team::BLUE>>(), BLUE_TANK_DEFAULT_TARGET, false);
+            place_color(RED_TANK_COUNT,  result.getT<EntityTank<Team::RED>> (), RED_TANK_DEFAULT_TARGET,  true );
 
-            place_color(BLUE_TANK_COUNT, result.getT<EntityTank<Team::BLUE>>(), Vec2f{ 0, h }, 0.0f, [](const auto& a, const auto& b) { return a + b; });
-            place_color(RED_TANK_COUNT,  result.getT<EntityTank<Team::RED>> (), Vec2f{ w, h }, PI,   [](const auto& a, const auto& b) { return a - b; });
+
+
+            auto& beams = result.getT<EntityBeam>();
+            beams.push_back(EntityBeam(BLUE_TANK_DEFAULT_TARGET));
+            beams.push_back(EntityBeam(RED_TANK_DEFAULT_TARGET));
+            beams.push_back(EntityBeam({ WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0 }));
 
             
             return result;

@@ -7,6 +7,7 @@
 #include "EntityBackground.h"
 #include "EntitySmoke.h"
 #include "EntityExplosion.h"
+#include "EntityBeam.h"
 
 namespace DroneSim::Game {
     // Entities earlier in the list are rendered first, and will appear behind entities further along.
@@ -16,7 +17,8 @@ namespace DroneSim::Game {
         EntityTank<Team::BLUE>,
         EntityRocket<Team::RED>,
         EntityRocket<Team::BLUE>,
+        EntitySmoke,
         EntityExplosion,
-        EntitySmoke
+        EntityBeam
     >;
 }

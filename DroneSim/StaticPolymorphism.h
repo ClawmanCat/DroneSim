@@ -13,6 +13,10 @@ namespace DroneSim::Traits {
     public:
         using Packed = Pack<Ts...>;
 
+
+        template <template <typename...> typename W> using Wrap = ClassList<W<Ts>...>;
+
+
         template <
             template <typename...> typename Container,
             template <typename...> typename Wrapper = NoWrapper

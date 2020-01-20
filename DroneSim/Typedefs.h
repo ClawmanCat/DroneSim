@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <chrono>
+#include <memory>
 
 
 #define DRONESIM_PASTE_IMPL(Rep, Count, Data) (Data)
@@ -56,10 +57,20 @@ namespace DroneSim {
 
     
 
+    // Reference wrappers
     template <typename T> using ref     = std::reference_wrapper<T>;
     template <typename T> using cref    = std::reference_wrapper<const T>;
     template <typename T> using no_ref  = std::remove_reference_t<T>;
     template <typename T> using no_cref = std::remove_const_t<std::remove_reference_t<T>>;
+
+    template <typename T> using no_ptr  = std::remove_pointer_t<T>;
+    template <typename T> using no_cptr = std::remove_const_t<std::remove_pointer_t<T>>;
+
+
+    // Smart pointers
+    template <typename T, typename D = std::default_delete<T>> using UPtr = std::unique_ptr<T, D>;
+    template <typename T>                                      using SPtr = std::shared_ptr<T>;
+    template <typename T>                                      using WPtr = std::weak_ptr<T>;
 
 
     // Function Pointer / Pointer to member

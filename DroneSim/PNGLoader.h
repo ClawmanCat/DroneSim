@@ -17,7 +17,7 @@ namespace DroneSim::FileIO {
     };
 
 
-    ImageData LoadPNG(std::string_view path) {
+    inline ImageData LoadPNG(std::string_view path) {
         auto bytes = ReadData(path);
         if (!bytes) terminate("Failed to load PNG image from disk.");
 

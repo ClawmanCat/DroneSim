@@ -12,6 +12,7 @@
 
 
 namespace DroneSim::Traits {
+    // TODO: Fix wrapper issues. (Move wrapping to ClassList?)
     template <
         template <typename...> typename Container, 
         template <typename...> typename Wrapper = NoWrapper,
@@ -28,7 +29,8 @@ namespace DroneSim::Traits {
 
 
         PolyContainer(void) : Base() {}
-        PolyContainer(Base&& b) : Base(std::forward<Base>(b)) {}
+        PolyContainer(const Base& b) : Base(b) {}
+        PolyContainer(Base&& b) : Base(std::move(b)) {}
 
 
         // Gets the type of the Nth subcontainer.

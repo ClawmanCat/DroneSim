@@ -10,21 +10,25 @@
 #include <string>
 
 namespace DroneSim::Game {
+    // We can't move IEntity methods to a cpp file, since it's a template class,
+    // so instead create this wrapper method to prevent circular dependencies.
+    namespace Detail {
+        extern u32 GetSimulationFrameCount(void);
+    }
+
+
     template <typename D> class IEntity : public GPU::ILayoutObject<D>, public GPU::ITextureProvider<D> {
     public:
-        constexpr static bool is_tank_tag = false;
-
-
-        constexpr static bool             MayChange(void)        { return D::MayChange();        }
-        constexpr static Vec2f            GetSize(void)          { return D::GetSize();          }
-        constexpr static u32              GetFrameCount(void)    { return D::GetFrameCount();    }
-        constexpr static std::string_view GetTexture(void)       { return D::GetTexture();       }
+        constexpr static bool             MayChange(void)           { return D::MayChange();        }
+        constexpr static Vec2f            GetSize(void)             { return D::GetSize();          }
+        constexpr static u32              GetFrameCount(void)       { return D::GetFrameCount();    }
+        constexpr static std::string_view GetTexture(void)          { return D::GetTexture();       }
+        constexpr static u32              GetFrameRepeatCount(void) { return 1;                     }
 
 
         constexpr static auto GetObjectLayout(void) {
             return std::array {
                 DRONESIM_GEN_LAYOUT_OBJ(D, position),
-                DRONESIM_GEN_LAYOUT_OBJ(D, rotation),
                 DRONESIM_GEN_LAYOUT_OBJ(D, frame)
             };
         }
@@ -36,27 +40,26 @@ namespace DroneSim::Game {
         }
 
 
-        IEntity(const Vec2f& position, float rotation) : position(position), rotation(rotation), frame(0) {}
+        IEntity(const Vec2f& position) : position(position), frame(0) {}
 
 
         void update(void) {
+            if (Detail::GetSimulationFrameCount() % GetFrameRepeatCount() != 0) return;
+
             if (frame < (GetFrameCount() - 1)) ++frame;
             else frame = 0;
         }
 
 
         Vec2f getPosition(void)     const { return position; }
-        float getRotation(void)     const { return rotation; }
         u32   getTextureFrame(void) const { return frame;    }
 
 
         void setPosition(const Vec2f& pos) { position = pos; }
-        void setRotation(float rot)        { rotation = rot; }
     protected:
         IEntity(void) = default;
 
         Vec2f position;
-        float rotation;
         u32 frame;
     };
 }

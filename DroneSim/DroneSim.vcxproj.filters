@@ -41,6 +41,18 @@
     <ClCompile Include="GLCompiler.cpp">
       <Filter>GPU\OpenGL</Filter>
     </ClCompile>
+    <ClCompile Include="EntityTank.cpp">
+      <Filter>Game\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityRocket.cpp">
+      <Filter>Game\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="IEntity.cpp">
+      <Filter>Game\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityBeam.cpp">
+      <Filter>Game\Entity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utility">
@@ -256,6 +268,12 @@
       <Filter>Utility\Traits</Filter>
     </ClInclude>
     <ClInclude Include="PolyContainerHelpers.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityBeam.h">
+      <Filter>Game\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="IsSpecialization.h">
       <Filter>Utility\Traits</Filter>
     </ClInclude>
   </ItemGroup>

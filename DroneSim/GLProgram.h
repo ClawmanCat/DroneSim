@@ -1,23 +1,19 @@
 #pragma once
 
 #include "Core.h"
-#include "IGPURunnable.h"
-#include "Pack.h"
 #include "GLBuffer.h"
-#include "Utility.h"
+#include "StaticPolymorphism.h"
+#include "VariadicSplitter.h"
 #include "GLSetUniform.h"
+#include "EntityList.h"
 
 #include <GL/glew.h>
 
+
 namespace DroneSim::GPU {
-    class GLProgram : public IGPURunnable<GLProgram, GLBuffer, const char*> {
+    class GLProgram {
     public:
         GLProgram(GLuint program) : program(program) {}
-
-
-        ~GLProgram(void) {
-            if (program) glDeleteProgram(program);
-        }
 
 
         GLProgram(const GLProgram&) = delete;
@@ -39,74 +35,49 @@ namespace DroneSim::GPU {
         }
 
 
-        template <typename T> constexpr static bool IsUniformAllowed(void) {
-            using AllowedTypes = Traits::Pack<
-                bool,
-                i8, Vec2b, Vec3b, Vec4b,
-                u8, Vec2ub, Vec3ub, Vec4ub,
-                i16, Vec2s, Vec3s, Vec4s,
-                u16, Vec2us, Vec3us, Vec4us,
-                i32, Vec2i, Vec3i, Vec4i,
-                u32, Vec2ui, Vec3ui, Vec4ui,
-                f32, Vec2f, Vec3f, Vec4f,
-                f64, Vec2d, Vec3d, Vec4d,
-                Mat2x2f, Mat2x3f, Mat2x4f,
-                Mat3x2f, Mat3x3f, Mat3x4f,
-                Mat4x2f, Mat4x3f, Mat4x4f,
-                Mat2x2d, Mat2x3d, Mat2x4d,
-                Mat3x2d, Mat3x3d, Mat3x4d,
-                Mat4x2d, Mat4x3d, Mat4x4d
-            >;
-
-            return AllowedTypes::Contains<T>();
+        ~GLProgram(void) {
+            if (program) glDeleteProgram(program);
         }
 
 
         void execute(void) {
             glUseProgram(program);
 
-            for (const auto& buffer : buffers) {
-                // Bind buffer
-                glBindVertexArray(buffer.vao);
-                glBindBuffer(GL_ARRAY_BUFFER, buffer.vbo);
+            buffers.forEach([&](const auto* buffer) {
+                glBindVertexArray(buffer->VAO());
+                glBindBuffer(GL_ARRAY_BUFFER, buffer->VBO());
 
-                // Set attribute locations
-                buffer.loadAttribs(program);
+                no_cptr<decltype(buffer)>::LoadLayout(program);
 
-                // Draw
-                glDrawArrays(buffer.type, 0, buffer.size);
-            }
+                glDrawArrays(buffer->type(), 0, buffer->size());
+            });
         }
 
-        // IntelliSense fails to correctly parse this method so just create a fake one when it is parsing.
-        #ifdef __INTELLISENSE__
-            template <typename T> GLuint addBuffer(const T& buffer) {}
-        #else
-            template <typename T> GLuint addBuffer(const BufferType<T>& buffer) {
-                buffers.push_back({ buffer.getVAO(), buffer.getVBO(), buffer.getType(), buffer.getSize(), buffer.getAttribLoader() });
-                return buffer.getVAO();
-            }
-        #endif
 
-        void removeBuffer(GLuint id) {
-            // Assume not many buffers.
-            Utility::swap_erase(buffers, std::find_if(buffers.begin(), buffers.end(), [&](const BufferData& bd) { return bd.vao == id; }));
+        // Stores a reference to the given buffer. It will be drawn the next time execute is called.
+        // The address of the buffer should remain valid until removeBuffer is called, but the contents of the buffer may change.
+        template <typename T> void addBuffer(const GLBuffer<T>* buffer) {
+            buffers.push_back<Wrapper<T>>(buffer);
         }
 
-        template <typename T> void setUniform(const T& uniform, const char* id) {
+
+        template <typename T> void removeBuffer(const GLBuffer<T>* buffer) {
+            buffers.erase<Wrapper<T>>(std::find_if(
+                buffers.begin<Wrapper<T>>(),
+                buffers.end<Wrapper<T>>(),
+                [&](const auto* b) { return b->VAO() == buffer->VAO(); }
+            ));
+        }
+
+
+        template <typename T> void setUniform(const char* name, const T& value) {
             glUseProgram(program);
-            GLSetUniform::Set(glGetUniformLocation(program, id), uniform);
+            GLSetUniform::Set(glGetUniformLocation(program, name), value);
         }
-    
+    private:
         GLuint program;
 
-        struct BufferData {
-            GLuint vao, vbo;
-            GLenum type;
-            std::size_t size;
-            FPtr<void, GLuint> loadAttribs;
-        };
-
-        std::vector<BufferData> buffers;
+        template <typename... Ts> using Wrapper = const GLBuffer<Ts...>*;
+        Game::Entities::Wrap<Wrapper>::PolyVector<> buffers;
     };
 }

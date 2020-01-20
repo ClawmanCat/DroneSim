@@ -8,7 +8,7 @@
 namespace DroneSim::Game {
     class EntityBackground : public IEntity<EntityBackground> {
     public:
-        EntityBackground(void) : IEntity({ WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0 }, 0.0) {}
+        EntityBackground(void) : IEntity({ WINDOW_WIDTH / 2.0, WINDOW_HEIGHT / 2.0 }) {}
 
         constexpr static bool             MayChange(void)        { return false;                            }
         constexpr static Vec2f            GetSize(void)          { return { WINDOW_WIDTH, WINDOW_HEIGHT };  }

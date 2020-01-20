@@ -1,39 +1,54 @@
 #pragma once
 
 #include "Core.h"
-#include "IGPUBuffer.h"
-#include "ILayoutObject.h"
-#include "ITextureProvider.h"
 
 #include <GL/glew.h>
 
+
 namespace DroneSim::GPU {
-    namespace Detail {
-        template <typename T> constexpr static bool AllowedType = (std::is_base_of_v<ILayoutObject<T>, T> && std::is_base_of_v<ITextureProvider<T>, T>);
-    }
-
-
-    template <typename T, typename = std::enable_if_t<Detail::AllowedType<T>>> class GLBuffer : public IGPUBuffer<GLBuffer<T>, T, true, false> {
+    template <typename T> class GLBuffer {
     public:
         using value_type = T;
 
-        constexpr static float BUFFER_INITIAL_ALLOC    = 1.2;
-        constexpr static float BUFFER_OVERALLOC_FACTOR = 1.5;
+
+        constexpr static float OVERALLOCATE_FACTOR = 1.5f;
 
 
-        GLBuffer(GLenum type, std::size_t size) : type(type), elems(0), alloc(size) {
+        GLBuffer(GLenum type = GL_POINTS) : vao(0), vbo(0), elems(0), alloc(0), drawType(type) {
             glGenVertexArrays(1, &vao);
             glBindVertexArray(vao);
 
             glGenBuffers(1, &vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-            glBufferData(GL_ARRAY_BUFFER, alloc * sizeof(T), nullptr, GL_DYNAMIC_DRAW);
         }
 
 
-        GLBuffer(GLenum type, const std::vector<T>& data) : GLBuffer(type, data.size() * BUFFER_INITIAL_ALLOC) {
+        GLBuffer(const std::vector<T>& data, GLenum type = GL_POINTS) : GLBuffer(type) {
             modify(0, data);
+        }
+
+
+        GLBuffer(const GLBuffer&) = delete;
+        GLBuffer& operator=(const GLBuffer&) = delete;
+
+
+        GLBuffer(GLBuffer&& other) : vao(other.vao), vbo(other.vbo), elems(other.elems), alloc(other.alloc), drawType(other.drawType) {
+            other.vao = other.vbo = nullptr;
+        }
+
+
+        GLBuffer& operator=(GLBuffer&& other) {
+            if (vao) glDeleteVertexArrays(1, &vao);
+            if (vbo) glDeleteBuffers(1, &vbo);
+
+            vao = other.vao;
+            vbo = other.vbo;
+            elems = other.elems;
+            alloc = other.alloc;
+            drawType = other.drawType;
+
+            other.vao = other.vbo = nullptr;
+
+            return *this;
         }
 
 
@@ -43,82 +58,51 @@ namespace DroneSim::GPU {
         }
 
 
-        GLBuffer(const GLBuffer&) = delete;
-        GLBuffer& operator=(const GLBuffer&) = delete;
-
-
-        GLBuffer(GLBuffer&& other) : vao(other.vao), vbo(other.vbo), type(other.type), elems(other.elems), alloc(other.alloc) {
-            other.vao = other.vbo = 0;
-        }
-
-
-        GLBuffer& operator=(GLBuffer&& other) {
-            if (vao) glDeleteVertexArrays(1, &vao);
-            if (vbo) glDeleteBuffers(1, &vbo);
-
-            vao   = other.vao;
-            vbo   = other.vbo;
-            type  = other.type;
-            elems = other.elems;
-            alloc = other.alloc;
-
-            other.vao = other.vbo = 0;
-        }
-
-
-        void modify(std::size_t where, std::size_t count, const T* data) {
-            if (where + count > elems) resize(std::max<u64>(where + count, elems));
+        // Modifies the buffer by overwriting it with the provided data, starting at `where`.
+        void modify(std::size_t where, const std::vector<T>& data) {
+            if (data.size() == 0) return;
+            if (where + data.size() > elems) resize(where + data.size());
 
             glBindVertexArray(vao);
-
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferSubData(GL_ARRAY_BUFFER, where * sizeof(T), count * sizeof(T), data);
 
-            elems = std::max(elems, where + count);
+            glBufferSubData(GL_ARRAY_BUFFER, where * sizeof(T), data.size() * sizeof(T), &data[0]);
         }
 
 
-        void modify(std::size_t where, const std::vector<T>& data) {
-            if (data.size() > 0) modify(where, data.size(), &data[0]);
+        // Resizes the buffer to have `count` elements. Reallocates if neccesary.
+        // If the new size is greater than the old one, 
+        // the newly allocated part of the buffer must be filled using GLBuffer::modify before drawing the buffer.
+        void resize(std::size_t count) {
+            reserve(count * OVERALLOCATE_FACTOR);
+            elems = count;
         }
 
 
-        void resize(std::size_t newcount) {
-            // New size fits in buffer, don't reallocate.
-            if (newcount < alloc) return;
+        // Allocates GPU memory for the buffer. 
+        // Giving a smaller value than the current allocation does not decrease the amount of allocated memory.
+        void reserve(std::size_t count) {
+            if (alloc >= count) return;
 
-            // New size is too big, reallocate.
-            GLuint newvbo;
+            GLuint newvbo = 0;
 
             glBindVertexArray(vao);
 
             glGenBuffers(1, &newvbo);
             glBindBuffer(GL_ARRAY_BUFFER, newvbo);
 
-            glBufferData(GL_ARRAY_BUFFER, newcount * sizeof(T), nullptr, GL_DYNAMIC_DRAW);
-            glCopyBufferSubData(vbo, newvbo, 0, 0, elems);
+            glBufferData(GL_ARRAY_BUFFER, count * sizeof(T), nullptr, GL_DYNAMIC_DRAW);
+            glCopyBufferSubData(vbo, newvbo, 0, 0, alloc * sizeof(T));
 
             glDeleteBuffers(1, &vbo);
 
             vbo   = newvbo;
-            alloc = newcount;
+            alloc = count;
         }
 
 
-        GLuint getVAO (void) const { return vao;  }
-        GLuint getVBO (void) const { return vbo;  }
-        GLenum getType(void) const { return type; }
-        std::size_t getSize(void) const { return elems; }
-        FPtr<void, GLuint> getAttribLoader(void) const { return &GLBuffer::BindAttributes; }
-    private:
-        GLuint vao, vbo;
-        GLenum type;
-
-        // number of elements stored and max capacity in elements.
-        std::size_t elems, alloc;
-
-
-        static void BindAttributes(GLuint program) {
+        // Load the vertex attribute layout for elements of the given buffer.
+        static void LoadLayout(GLuint program) {
             for (const auto& component : T::GetObjectLayout()) {
                 // TODO: Remember indices between calls.
                 GLint index = glGetAttribLocation(program, component.name);
@@ -129,5 +113,16 @@ namespace DroneSim::GPU {
 
             glBindTexture(GL_TEXTURE_2D, T::GetTextureID());
         }
+
+
+        GLuint      VAO (void) const { return vao;       }
+        GLuint      VBO (void) const { return vbo;       }
+        std::size_t size(void) const { return elems;     }
+        GLenum      type(void) const { return drawType;  }
+    private:
+        GLuint vao, vbo;
+        std::size_t elems, alloc;
+
+        GLenum drawType;
     };
 }
