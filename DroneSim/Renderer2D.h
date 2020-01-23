@@ -65,7 +65,7 @@ namespace DroneSim::Render {
 
 
             // Render health bars
-            auto height = [&](const auto& buffer) { return WINDOW_SCALE.y * Game::HEALTHBAR_HEIGHT / buffer.size(); };
+            constexpr static float HEIGHT = 2.0f * float(Game::HEALTHBAR_HEIGHT) / Game::WINDOW_HEIGHT;
 
             auto renderbuffer = [&](const auto& src, auto& dest, float offset) {
                 dest.modify(0, src);
@@ -73,8 +73,9 @@ namespace DroneSim::Render {
 
                 healthShader.addBuffer(&dest);
 
+                healthShader.setUniform("count",  (u32) src.size());
                 healthShader.setUniform("offset", offset);
-                healthShader.setUniform("height", height(src));
+                healthShader.setUniform("height", HEIGHT);
                 healthShader.setUniform("limit",  (float) Game::TANK_MAX_HEALTH);
 
                 healthShader.execute();
@@ -82,8 +83,8 @@ namespace DroneSim::Render {
                 healthShader.removeBuffer(&dest);
             };
 
-            renderbuffer(topbar, topbuffer, 2.0f - height(topbar) * topbar.size());
-            renderbuffer(btmbar, btmbuffer, 0.0);
+            renderbuffer(topbar, topbuffer, 1.0 - HEIGHT);
+            renderbuffer(btmbar, btmbuffer, -1.0);
         }
     private:
         // Store pointer so we can keep references to each buffer in the renderer.

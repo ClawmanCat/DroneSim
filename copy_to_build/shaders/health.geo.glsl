@@ -10,22 +10,25 @@ in uint[1] geo_index;
 out vec2 uv;
 
 
-uniform float offset;
-uniform float height;
-uniform float limit;
+uniform uint  count;     // The number of healthbars being rendered.
+uniform float offset;    // Y-offset for the healthbars.
+uniform float height;    // The height of a healthbar.
+uniform float limit;     // The amount of health in a healthbar.
 
 
 void main() {
-     float dx = 1.0 - ((geo_value[0] / limit) * 2.0);
-     float dy = -1.0 + offset + (geo_index[0] * height);
+     float w   = 2.0 / float(count);
+     float dx  = 1.0 - (w * geo_index[0]);
+     float dy  = (float(geo_value[0]) / limit) * height;
+
 
      vec2 vertices[6] = vec2[6](
-          vec2(-1.0, dy         ),
-          vec2(-1.0, dy + height),
-          vec2(dx,   dy         ),
-          vec2(dx,   dy + height),
-          vec2(1.0,  dy         ),
-          vec2(1.0,  dy + height)
+          vec2(dx,     offset),
+          vec2(dx - w, offset),
+          vec2(dx,     offset + dy),
+          vec2(dx - w, offset + dy),
+          vec2(dx,     offset + height),
+          vec2(dx - w, offset + height)
      );
 
      
