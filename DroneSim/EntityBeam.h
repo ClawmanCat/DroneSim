@@ -30,7 +30,7 @@ namespace DroneSim::Game {
             const float radius = tank.GetRadius();
 
             const Vec2f delta = where - glm::clamp(where, min, max);
-            return glm::dot(delta, delta) <= radius * radius;
+            return Utility::dotself(delta) <= radius * radius;
         }
 
 

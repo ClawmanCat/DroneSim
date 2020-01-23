@@ -8,9 +8,10 @@
 namespace DroneSim::Game {
     template <Team team> class EntityRocket : public EntityRotating<EntityRocket<team>> {
     public:
+        // Being at this point marks a rocket for deletion.
+        constexpr static Vec2f DESTRUCT_POINT = Vec2f{ std::numeric_limits<float>::infinity() };
         // A large number, but not so large it will cause major rounding issues.
         constexpr static float LARGE_NUMBER = 1000.0f;
-
 
         using Base = EntityRotating<EntityRocket<team>>;
         using EntityRotating<EntityRocket<team>>::EntityRotating;
@@ -18,6 +19,7 @@ namespace DroneSim::Game {
 
         // Move the target backwards along the vector the rocket will travel along,
         // so it will keep going if there is no more tank there by the time it arrives.
+        // TODO: Keep target normalized and move it instead.
         EntityRocket(const Vec2f& position, const Vec2f& target) : Base(position, (target - position) * LARGE_NUMBER) {}
 
 
@@ -36,9 +38,10 @@ namespace DroneSim::Game {
 
         template <typename Tank> bool collides(const Tank& tank) const {
             const Vec2f delta      = tank.getPosition() - position;
-            const float distanceSq = glm::dot(delta, delta);
+            const float distanceSq = Utility::dotself(delta);
+            const float radiusSq   = Utility::square(Tank::GetRadius() + GetRadius());
 
-            return distanceSq <= (GetRadius() * GetRadius()) + (Tank::GetRadius() * Tank::GetRadius());
+            return distanceSq <= radiusSq;
         }
     };
 }

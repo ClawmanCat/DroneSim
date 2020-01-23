@@ -21,7 +21,6 @@
 
         // Force window initialization.
         DroneSim::Render::WindowController::instance();
-
         DroneSim::Game::GameController::instance().start(std::move(args));
 
         return 0;

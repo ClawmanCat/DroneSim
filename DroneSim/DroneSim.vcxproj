@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
@@ -206,6 +206,7 @@
     <ClInclude Include="EntityBeam.h" />
     <ClInclude Include="EntityExplosion.h" />
     <ClInclude Include="EntityList.h" />
+    <ClInclude Include="EntitySelectors.h" />
     <ClInclude Include="EntitySmoke.h" />
     <ClInclude Include="EntityRocket.h" />
     <ClInclude Include="EntityRotating.h" />
@@ -223,11 +224,13 @@
     <ClInclude Include="GameController.h" />
     <ClInclude Include="GLSetUniform.h" />
     <ClInclude Include="EntityBackground.h" />
+    <ClInclude Include="HealthBar.h" />
     <ClInclude Include="IsSpecialization.h" />
     <ClInclude Include="ITextureProvider.h" />
     <ClInclude Include="PolyContainer.h" />
     <ClInclude Include="PolyContainerHelpers.h" />
     <ClInclude Include="PolyVector.h" />
+    <ClInclude Include="RenderableList.h" />
     <ClInclude Include="Renderer2D.h" />
     <ClInclude Include="StaticPolymorphism.h" />
     <ClInclude Include="TakesOverload.h" />
@@ -262,6 +265,9 @@
     <None Include="..\copy_to_build\shaders\batch.frag.glsl" />
     <None Include="..\copy_to_build\shaders\batch.geo.glsl" />
     <None Include="..\copy_to_build\shaders\batch.vert.glsl" />
+    <None Include="..\copy_to_build\shaders\health.frag.glsl" />
+    <None Include="..\copy_to_build\shaders\health.geo.glsl" />
+    <None Include="..\copy_to_build\shaders\health.vert.glsl" />
     <None Include="..\copy_to_build\shaders\test.frag.glsl" />
     <None Include="..\copy_to_build\shaders\test.vert.glsl" />
   </ItemGroup>

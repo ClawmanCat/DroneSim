@@ -22,6 +22,6 @@ namespace DroneSim::Game {
     constexpr static u32 ROCKET_DAMAGE                  = 60;
     constexpr static u32 BEAM_DAMAGE                    = 50;
 
-    constexpr static float TANK_MAX_SPEED               = 1.5;      // Misleading name, see EntityTank.cpp
+    constexpr static float TANK_MAX_SPEED               = 1.5;
     constexpr static float ROCKET_MAX_SPEED             = 3.0;
 }

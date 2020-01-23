@@ -10,5 +10,5 @@ uniform sampler2D sampler;
 void main() {
      // UV is exactly at the corner of the pixel. Floating point errors may cause it to dip below,
      // so add a small offset.
-     color = texture(sampler, uv + vec2(0.00001, 0.00001));
+     color = texture(sampler, uv);
 }

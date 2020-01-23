@@ -8,6 +8,7 @@
 #include "Timer.h"
 #include "PolyVector.h"
 #include "EntitySelectors.h"
+#include "HealthBar.h"
 
 #include <vector>
 #include <string>
@@ -51,7 +52,7 @@ namespace DroneSim::Game {
 
             for (std::size_t i = 0; i < enemies.size(); ++i) {
                 Vec2f d   = tank.getPosition() - enemies[i].getPosition();
-                float dsq = glm::dot(d, d);
+                float dsq = Utility::dotself(d);
 
                 if (dsq < distanceSq) {
                     closest = i;
@@ -75,14 +76,20 @@ namespace DroneSim::Game {
         u64 frames = 0;
 
         Entities::PolyVector<> entities;
+        std::vector<HealthBar> topbar, btmbar; // Health bars.
 
         Render::Renderer2D renderer;
 
 
-        GameController(void) : timer(), entities(GetInitialEntities()), renderer(entities) {}
+        GameController(void) : timer(), entities(GetInitialEntities()), renderer(entities, topbar, btmbar) {}
 
 
         void tick(void) {
+            // Perform collision detection on tanks.
+            auto tanks = entities.select<TankSelector>();
+            tanks.forEach([](auto& tank) { tank.avoidCollision(); });
+
+
             // Update entities.
             entities.forEach([](auto& entity, std::size_t n) { 
                 entity.update(); 
@@ -114,6 +121,39 @@ namespace DroneSim::Game {
                     container.end()
                 );
             });
+
+
+            // Calculate health bars.
+            auto healthsort = [](const auto& source, auto& dest) {
+                auto convert = [](const auto& tank) { return HealthBar{ tank.getHealth() }; };
+                
+                dest.clear();
+                dest.reserve(source.size());
+
+                dest.push_back(convert(source.front()));
+
+                for (u32 i = 1; i < source.size(); ++i) {
+                    auto first = convert(source[i]);
+
+                    for (u32 j = dest.size() - 1; j >= 0; --j) {
+                        const auto& second = dest[j];
+
+                        if (second.value > first.value) {
+                            dest.insert(dest.begin() + j + 1, first);
+                            break;
+                        }
+
+                        if (j == 0) {
+                            dest.insert(dest.begin(), first);
+                            break;
+                        }
+                    }
+                }
+            };
+            
+
+            healthsort(entities.getT<EntityTank<Team::BLUE>>(), topbar);
+            healthsort(entities.getT<EntityTank<Team::RED >>(), btmbar);
         }
 
 

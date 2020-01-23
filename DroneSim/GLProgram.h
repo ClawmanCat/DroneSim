@@ -5,7 +5,7 @@
 #include "StaticPolymorphism.h"
 #include "VariadicSplitter.h"
 #include "GLSetUniform.h"
-#include "EntityList.h"
+#include "RenderableList.h"
 
 #include <GL/glew.h>
 
@@ -78,6 +78,6 @@ namespace DroneSim::GPU {
         GLuint program;
 
         template <typename... Ts> using Wrapper = const GLBuffer<Ts...>*;
-        Game::Entities::Wrap<Wrapper>::PolyVector<> buffers;
+        Game::Renderables::Wrap<Wrapper>::PolyVector<> buffers;
     };
 }

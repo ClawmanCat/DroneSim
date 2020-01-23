@@ -15,6 +15,7 @@ namespace DroneSim::Traits {
 
 
         template <template <typename...> typename W> using Wrap = ClassList<W<Ts>...>;
+        template <typename... Xs> using Append = ClassList<Ts..., Xs...>;
 
 
         template <

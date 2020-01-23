@@ -20,7 +20,7 @@ namespace DroneSim::Game {
                 controller.getEntities().push_back(EntityExplosion(position));
 
                 // Mark for deletion.
-                target = ZVec2f;
+                target = DESTRUCT_POINT;
             }
         });
 
@@ -30,7 +30,7 @@ namespace DroneSim::Game {
 
 
     template <Team team> bool EntityRocket<team>::alive(void) const {
-        return target != ZVec2f;
+        return target != DESTRUCT_POINT;
     }
 
 

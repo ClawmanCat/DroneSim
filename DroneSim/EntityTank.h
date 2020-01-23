@@ -32,6 +32,7 @@ namespace DroneSim::Game {
         constexpr static Team             GetTeam(void)          { return team;                                           }
 
 
+        void avoidCollision(void);
         void update(void);
 
         void push(const Vec2f& direction, float magnitude = 1.0f);
@@ -40,6 +41,9 @@ namespace DroneSim::Game {
 
         bool ready(void) const;
         bool alive(void) const;
+
+
+        u16 getHealth(void) const { return data->health; }
 
 
         template <typename T> constexpr bool operator==      (const T&    t) const { return false; }

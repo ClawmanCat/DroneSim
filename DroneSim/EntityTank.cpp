@@ -44,44 +44,58 @@ namespace DroneSim::Game {
     }
 
 
-    template <Team team> void EntityTank<team>::update(void) {
+    template <Team team> void EntityTank<team>::avoidCollision(void) {
+        // Don't push if this tank is dead.
         if (data->health == 0) return;
+
 
         GameController& controller = GameController::instance();
         auto tanks = controller.getEntities().select<TankSelector>();
 
+
         // Collision detection.
         // TODO: Use proximity-friendly storage. (Quadtree or such.)
-        tanks.forEach([&](const auto& tank) {
+        tanks.forEach([&](auto& tank) {
             // Don't collide with self.
             if (tank == *this) return;
 
-            Vec2f direction  = getDirection();
-            float distanceSq = glm::dot(direction, direction);
+            Vec2f direction  = position - tank.getPosition();
+            float distanceSq = Utility::dotself(direction);
             
             // x2, since it is the sum of the radii of both tanks.
             float radiusSq = (2 * GetRadius() * GetRadius());
-            radiusSq *= radiusSq;
 
-
-            if (distanceSq < radiusSq) {
-                push(glm::normalize(direction));
+            if (distanceSq <= radiusSq) {
+                // Using a constant factor here like in the original code did not work properly with the new code,
+                // instead we push harder if the tank is closer.
+                // Tanks still vibrate if they are too densely packed, but they now do so with approximately. the same amount as
+                // the original code.
+                push(glm::normalize(direction), Utility::scale(radiusSq - distanceSq, { 0.0f, radiusSq }, { 0.0f, 4.0f }));
             }
         });
+    }
+
+
+    template <Team team> void EntityTank<team>::update(void) {
+        if (data->health == 0) return;
+
+
+        GameController& controller = GameController::instance();
 
 
         // Move tank
-        // This does not actually prevent anything from travelling faster than TANK_MAX_SPEED, 
-        // but it is what was used in the original code.
         const Vec2f direction = glm::normalize(getDirection());
-        position += (direction + data->force) * TANK_MAX_SPEED * 0.5f;
+        const Vec2f speed = direction + data->force;
         
-        data->force = ZVec2f;
+        position += speed * TANK_MAX_SPEED * 0.5f;
 
-        if (data->reload_time > 0) --data->reload_time;
+        data->force = ZVec2f;
 
 
         // Launch rocket
+        if (data->reload_time > 0) --data->reload_time;
+
+
         if (data->reload_time == 0) {
             const auto& target = controller.findClosestEnemy(*this);
             controller.getEntities().push_back(EntityRocket<team>(position, target.getPosition()));
