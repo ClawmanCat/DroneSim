@@ -2,30 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="template.cpp">
-      <Filter>Old\template</Filter>
-    </ClCompile>
-    <ClCompile Include="surface.cpp">
-      <Filter>Old\template</Filter>
-    </ClCompile>
-    <ClCompile Include="game.cpp">
-      <Filter>Old</Filter>
-    </ClCompile>
-    <ClCompile Include="tank.cpp">
-      <Filter>Old</Filter>
-    </ClCompile>
-    <ClCompile Include="particle_beam.cpp">
-      <Filter>Old</Filter>
-    </ClCompile>
-    <ClCompile Include="smoke.cpp">
-      <Filter>Old</Filter>
-    </ClCompile>
-    <ClCompile Include="rocket.cpp">
-      <Filter>Old</Filter>
-    </ClCompile>
-    <ClCompile Include="explosion.cpp">
-      <Filter>Old</Filter>
-    </ClCompile>
     <ClCompile Include="FileIO.cpp">
       <Filter>Utility\IO</Filter>
     </ClCompile>
@@ -66,12 +42,6 @@
     </Filter>
     <Filter Include="Game">
       <UniqueIdentifier>{8f3370a0-ef6c-4b19-99fe-156ec02595c5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Old">
-      <UniqueIdentifier>{21693206-6c00-452b-bdd8-b75b8d0aaf7b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Old\template">
-      <UniqueIdentifier>{16e6dc04-1435-4aec-be3a-f7210f21e58e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Game\Entity">
       <UniqueIdentifier>{dbd37f14-330b-450a-acb4-c180b6e25ebb}</UniqueIdentifier>
@@ -119,33 +89,6 @@
     </ClInclude>
     <ClInclude Include="GameController.h">
       <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="template.h">
-      <Filter>Old\template</Filter>
-    </ClInclude>
-    <ClInclude Include="pch.h">
-      <Filter>Old\template</Filter>
-    </ClInclude>
-    <ClInclude Include="surface.h">
-      <Filter>Old\template</Filter>
-    </ClInclude>
-    <ClInclude Include="game.h">
-      <Filter>Old</Filter>
-    </ClInclude>
-    <ClInclude Include="tank.h">
-      <Filter>Old</Filter>
-    </ClInclude>
-    <ClInclude Include="particle_beam.h">
-      <Filter>Old</Filter>
-    </ClInclude>
-    <ClInclude Include="smoke.h">
-      <Filter>Old</Filter>
-    </ClInclude>
-    <ClInclude Include="rocket.h">
-      <Filter>Old</Filter>
-    </ClInclude>
-    <ClInclude Include="explosion.h">
-      <Filter>Old</Filter>
     </ClInclude>
     <ClInclude Include="IEntity.h">
       <Filter>Game\Entity</Filter>
@@ -285,6 +228,15 @@
     <ClInclude Include="RenderableList.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="GLFrameBuffer.h">
+      <Filter>GPU\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityBGOverlay.h">
+      <Filter>Game\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityChar.h">
+      <Filter>Game\Entity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\copy_to_build\kernels\test.cl">
@@ -312,6 +264,12 @@
       <Filter>GPU\OpenGL\Shaders</Filter>
     </None>
     <None Include="..\copy_to_build\shaders\health.vert.glsl">
+      <Filter>GPU\OpenGL\Shaders</Filter>
+    </None>
+    <None Include="..\copy_to_build\shaders\tracks.frag.glsl">
+      <Filter>GPU\OpenGL\Shaders</Filter>
+    </None>
+    <None Include="..\copy_to_build\shaders\tracks.vert.glsl">
       <Filter>GPU\OpenGL\Shaders</Filter>
     </None>
   </ItemGroup>

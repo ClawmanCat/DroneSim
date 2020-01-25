@@ -10,6 +10,8 @@
 #include "VariadicSplitter.h"
 #include "ILayoutObject.h"
 #include "HealthBar.h"
+#include "GLFrameBuffer.h"
+#include "EntitySelectors.h"
 
 #include <vector>
 
@@ -40,6 +42,7 @@ namespace DroneSim::Render {
 
         void renderFrame(void) {
             constexpr Vec2f WINDOW_SCALE = Vec2f{ 1.0f / Game::WINDOW_WIDTH, 1.0f / Game::WINDOW_HEIGHT };
+
 
             // Render world contents
             // Most of the buffer contents change each frame, so there's not much point in doing a partial update.

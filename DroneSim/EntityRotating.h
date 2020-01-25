@@ -18,10 +18,12 @@ namespace DroneSim::Game {
 
 
         void update(void) {
-            // Set frame to match rotation and increment it every tick.
-            const Vec2f absdir = glm::abs(getDirection());
+            auto& self = static_cast<D&>(*this);
 
-            const Vec2f direction = getDirection();
+            // Set frame to match rotation and increment it every tick.
+            const Vec2f absdir = glm::abs(self.getDirection());
+
+            const Vec2f direction = self.getDirection();
             u32 frame_base = GetFramesPerAnim() * ((absdir.x > absdir.y)
                 ? (direction.x < 0) ? 1 : 0
                 : (direction.y < 0) ? 2 : 3);

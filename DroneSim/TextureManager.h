@@ -43,24 +43,6 @@ namespace DroneSim::GPU {
 
             return id;
         }
-
-
-        // TODO: Test with rendering to the texture as a FBO.
-        void modifyTexture(TextureID id, const Vec2ui& where, const FileIO::RGBA& value) {
-            glBindTexture(GL_TEXTURE_2D, id);
-
-            glTexSubImage2D(
-                GL_TEXTURE_2D,
-                0,
-                where.x,
-                where.y,
-                1,
-                1,
-                GL_RGBA,
-                GL_UNSIGNED_BYTE,
-                &value
-            );
-        }
     private:
         HashMap<std::string, TextureID> ids;
 

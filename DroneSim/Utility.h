@@ -23,4 +23,10 @@ namespace DroneSim::Utility {
     template <typename T> constexpr inline auto square(const T& v) {
         return v * v;
     }
+
+
+    template <typename T> constexpr inline bool inRange(const Vec2<T>& v, const Vec2<T>& min, const Vec2<T>& max) {
+        return v.x >= min.x && v.x < max.x &&
+               v.y >= min.y && v.y < max.y;
+    }
 }

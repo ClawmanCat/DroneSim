@@ -2,6 +2,8 @@
 #include "GameController.h"
 #include "EntitySelectors.h"
 #include "EntityRocket.h"
+#include "TextureManager.h"
+
 
 namespace DroneSim::Game {
     template <Team team> EntityTank<team>::EntityTank(const Vec2f& pos, const Vec2f& target) : Base(pos, target) {
@@ -79,22 +81,18 @@ namespace DroneSim::Game {
     template <Team team> void EntityTank<team>::update(void) {
         if (data->health == 0) return;
 
-
         GameController& controller = GameController::instance();
-
 
         // Move tank
         const Vec2f direction = glm::normalize(getDirection());
         const Vec2f speed = direction + data->force;
         
         position += speed * TANK_MAX_SPEED * 0.5f;
-
         data->force = ZVec2f;
 
 
         // Launch rocket
         if (data->reload_time > 0) --data->reload_time;
-
 
         if (data->reload_time == 0) {
             const auto& target = controller.findClosestEnemy(*this);
@@ -103,6 +101,12 @@ namespace DroneSim::Game {
             data->reload_time = 200;
         }
 
+
+        // Draw tracks
+        const static Vec2f HALF_SIZE = 0.5f * GetSize();
+
+        auto& overlay = controller.getEntities().getT<EntityBGOverlay>()[0];
+        overlay.updateOverlay((Vec2ui) (position - HALF_SIZE), { 0x80, 0x80, 0x80, 0xFF });
 
         static_cast<Base&>(*this).update();
     }

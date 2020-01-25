@@ -9,6 +9,23 @@
 
 
 namespace DroneSim::Game {
+    template <typename T> struct BufferPointerWrapper {
+    private:
+        // Take the template of container C, and give it new template arguments.
+        template <typename> struct GetC {};
+        template <template <typename...> typename C, typename... Ts> struct GetC<C<Ts...>> {
+            template <template <typename...> typename X> using Apply = C<X<Ts...>>;
+        };
+
+        // Get the type contained in the buffer
+        template <typename X, typename...> using NoBuffer = typename std::remove_pointer_t<X>::value_type;
+    public:
+        template <typename C, std::size_t N> constexpr static bool select(void) {
+            return T::template select<typename GetC<C>::template Apply<NoBuffer>, N>();
+        }
+    };
+
+
     struct TankSelector {
         template <typename C, std::size_t N> constexpr static bool select(void) {
             return Traits::IsVariableSpecialization<Team>::IsSpecialization<EntityTank, typename C::value_type>::value;

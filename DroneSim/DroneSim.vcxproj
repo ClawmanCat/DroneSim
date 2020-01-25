@@ -90,14 +90,14 @@
       <FloatingPointExceptions>false</FloatingPointExceptions>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)FreeImage\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <AdditionalLibraryDirectories>$(TargetDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>CALL "$(SolutionDir)onPrebuild.bat" "$(TargetDir)"</Command>
@@ -121,7 +121,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(SolutionDir)FreeImage\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -132,7 +132,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <AdditionalDependencies>FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TargetDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
@@ -158,7 +158,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(SolutionDir)FreeImage\Source\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -169,7 +169,7 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <AdditionalDependencies>FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TargetDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -181,19 +181,11 @@
     <ClCompile Include="EntityBeam.cpp" />
     <ClCompile Include="EntityRocket.cpp" />
     <ClCompile Include="EntityTank.cpp" />
-    <ClCompile Include="explosion.cpp" />
     <ClCompile Include="FileIO.cpp" />
-    <ClCompile Include="game.cpp" />
     <ClCompile Include="GLCompiler.cpp" />
     <ClCompile Include="IEntity.cpp" />
     <ClCompile Include="LodePNG.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="particle_beam.cpp" />
-    <ClCompile Include="rocket.cpp" />
-    <ClCompile Include="smoke.cpp" />
-    <ClCompile Include="surface.cpp" />
-    <ClCompile Include="tank.cpp" />
-    <ClCompile Include="template.cpp" />
     <ClCompile Include="WindowController.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -204,6 +196,8 @@
     <ClInclude Include="CLProgram.h" />
     <ClInclude Include="ConstexprArg.h" />
     <ClInclude Include="EntityBeam.h" />
+    <ClInclude Include="EntityBGOverlay.h" />
+    <ClInclude Include="EntityChar.h" />
     <ClInclude Include="EntityExplosion.h" />
     <ClInclude Include="EntityList.h" />
     <ClInclude Include="EntitySelectors.h" />
@@ -216,11 +210,10 @@
     <ClInclude Include="GameConstants.h" />
     <ClInclude Include="GLBuffer.h" />
     <ClInclude Include="GLCompiler.h" />
+    <ClInclude Include="GLFrameBuffer.h" />
     <ClInclude Include="GLProgram.h" />
     <ClInclude Include="Core.h" />
-    <ClInclude Include="explosion.h" />
     <ClInclude Include="FileIO.h" />
-    <ClInclude Include="game.h" />
     <ClInclude Include="GameController.h" />
     <ClInclude Include="GLSetUniform.h" />
     <ClInclude Include="EntityBackground.h" />
@@ -243,15 +236,8 @@
     <ClInclude Include="ILayoutObject.h" />
     <ClInclude Include="LodePNG.h" />
     <ClInclude Include="Pack.h" />
-    <ClInclude Include="particle_beam.h" />
-    <ClInclude Include="pch.h" />
     <ClInclude Include="PNGLoader.h" />
-    <ClInclude Include="rocket.h" />
-    <ClInclude Include="smoke.h" />
     <ClInclude Include="StringUtils.h" />
-    <ClInclude Include="surface.h" />
-    <ClInclude Include="tank.h" />
-    <ClInclude Include="template.h" />
     <ClInclude Include="Terminate.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Typedefs.h" />
@@ -270,6 +256,8 @@
     <None Include="..\copy_to_build\shaders\health.vert.glsl" />
     <None Include="..\copy_to_build\shaders\test.frag.glsl" />
     <None Include="..\copy_to_build\shaders\test.vert.glsl" />
+    <None Include="..\copy_to_build\shaders\tracks.frag.glsl" />
+    <None Include="..\copy_to_build\shaders\tracks.vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

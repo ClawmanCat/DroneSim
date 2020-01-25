@@ -10,7 +10,7 @@ namespace DroneSim::Game {
 
 
         // Move
-        position += ROCKET_MAX_SPEED * glm::normalize(getDirection());
+        position += ROCKET_MAX_SPEED * target;
 
 
         // Explode if near enemy.

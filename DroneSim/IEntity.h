@@ -40,7 +40,7 @@ namespace DroneSim::Game {
         }
 
 
-        IEntity(const Vec2f& position) : position(position), frame(0) {}
+        IEntity(const Vec2f& position, u32 frame = 0) : position(position), frame(frame) {}
 
 
         void update(void) {
