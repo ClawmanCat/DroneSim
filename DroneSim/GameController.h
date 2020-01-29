@@ -10,6 +10,7 @@
 #include "EntitySelectors.h"
 #include "HealthBar.h"
 #include "PNGLoader.h"
+#include "SpatialPartition.h"
 
 #include <vector>
 #include <string>
@@ -29,19 +30,6 @@ namespace DroneSim::Game {
             this->args = std::move(args);
 
             loop();
-        }
-
-
-        template <typename T, typename = std::enable_if_t<Entities::Contains<T>()>> void addEntity(T&& entity) {
-            Traits::PolyContainerGetT<T>(entities).push_back(std::move(entity));
-        }
-
-
-        template <typename T, typename = std::enable_if_t<Entities::Contains<T>()>> void removeEntity(const T& entity) {
-            auto& v = Traits::PolyContainerGetT<T>(entities);
-            
-            std::size_t index = &entity - &v.data[0];
-            Utility::swap_erase(v, v.begin() + index);
         }
 
 
@@ -69,6 +57,9 @@ namespace DroneSim::Game {
 
         auto& getEntities(void) { return entities; }
         const auto& getEntities(void) const { return entities; }
+        
+        template <Team team> auto&       getPartitions(void)       { if constexpr (team == Team::BLUE) return *bluept; else return *redpt; }
+        template <Team team> const auto& getPartitions(void) const { if constexpr (team == Team::BLUE) return *bluept; else return *redpt; }
 
         u32 getFrameCount(void) const { return frames; }
     private:
@@ -79,8 +70,13 @@ namespace DroneSim::Game {
         u64 frames = 0;
 
         Entities::PolyVector<> entities;
-        std::vector<HealthBar> topbar, btmbar; // Health bars.
-        std::array<EntityChar*, 4> counter;
+
+        // Tank position tree.
+        SpatialPartition<EntityTank<Team::BLUE>>* bluept;
+        SpatialPartition<EntityTank<Team::RED >>* redpt;
+
+        std::vector<HealthBar> topbar, btmbar;  // Health bars.
+        std::array<EntityChar*, 4> counter;     // Frame counter.
 
         Render::Renderer2D renderer;
 
@@ -93,7 +89,16 @@ namespace DroneSim::Game {
         }
 
 
+        ~GameController(void) {
+            delete bluept;
+            delete redpt;
+        }
+
+
         void tick(void) {
+            rebuild_partitions();
+
+
             // Perform collision detection on tanks.
             auto tanks = entities.select<TankSelector>();
             tanks.forEach([](auto& tank) { tank.avoidCollision(); });
@@ -133,7 +138,7 @@ namespace DroneSim::Game {
 
 
             // Calculate health bars.
-            // TODO: std::sort
+            // TODO: better sorting algorithm
             auto healthsort = [](const auto& source, auto& dest) {
                 auto convert = [](const auto& tank) { return HealthBar{ tank.getHealth() }; };
                 
@@ -200,6 +205,19 @@ namespace DroneSim::Game {
 
                 ++frames;
             }
+        }
+
+
+        void rebuild_partitions(void) {
+            redpt  = new SpatialPartition<EntityTank<Team::RED >>();
+            bluept = new SpatialPartition<EntityTank<Team::BLUE>>();
+
+
+            auto tanks = entities.select<TankSelector>();
+            tanks.forEach([&](auto& tank) {
+                using type = no_cref<decltype(tank)>;
+                getPartitions<type::GetTeam()>().insert(&tank);
+            });
         }
 
 

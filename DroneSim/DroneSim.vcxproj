@@ -220,11 +220,13 @@
     <ClInclude Include="HealthBar.h" />
     <ClInclude Include="IsSpecialization.h" />
     <ClInclude Include="ITextureProvider.h" />
+    <ClInclude Include="MakeVisitor.h" />
     <ClInclude Include="PolyContainer.h" />
     <ClInclude Include="PolyContainerHelpers.h" />
     <ClInclude Include="PolyVector.h" />
     <ClInclude Include="RenderableList.h" />
     <ClInclude Include="Renderer2D.h" />
+    <ClInclude Include="SpatialPartition.h" />
     <ClInclude Include="StaticPolymorphism.h" />
     <ClInclude Include="TakesOverload.h" />
     <ClInclude Include="Teams.h" />

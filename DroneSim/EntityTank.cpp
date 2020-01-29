@@ -50,31 +50,32 @@ namespace DroneSim::Game {
         // Don't push if this tank is dead.
         if (data->health == 0) return;
 
-
         GameController& controller = GameController::instance();
-        auto tanks = controller.getEntities().select<TankSelector>();
 
 
-        // Collision detection.
-        // TODO: Use proximity-friendly storage. (Quadtree or such.)
-        tanks.forEach([&](auto& tank) {
-            // Don't collide with self.
-            if (tank == *this) return;
+        Utility::multi_for_each(
+            [&](const auto* tank) {
+                // Prevent the tank from pushing itself.
+                if constexpr (std::is_same_v<
+                    no_cref<decltype(*this)>,
+                    no_cref<decltype(*tank)>
+                >) if (*this == *tank) return;
 
-            Vec2f direction  = position - tank.getPosition();
-            float distanceSq = Utility::dotself(direction);
-            
-            // x2, since it is the sum of the radii of both tanks.
-            float radiusSq = (2 * GetRadius() * GetRadius());
 
-            if (distanceSq <= radiusSq) {
-                // Using a constant factor here like in the original code did not work properly with the new code,
-                // instead we push harder if the tank is closer.
-                // Tanks still vibrate if they are too densely packed, but they now do so with approximately. the same amount as
-                // the original code.
-                push(glm::normalize(direction), Utility::scale(radiusSq - distanceSq, { 0.0f, radiusSq }, { 0.0f, 4.0f }));
-            }
-        });
+                const Vec2f delta = position - tank->getPosition();
+
+                const float dsq = glm::dot(delta, delta);
+                // Not actually the radii squared. See SpatialPartition::nearby.
+                const float rsq = 2 * GetRadius() * GetRadius();
+
+                // Scale force to distance to decrease tank vibrations.
+                push(glm::normalize(delta), Utility::scale(rsq - dsq, { 0.0f, rsq }, { 0.0f, 4.0f }));
+            },
+
+            // Yes these numbers aren't correct. See SpatialPartition::nearby.
+            controller.getPartitions<Team::BLUE>().nearby(position, 2 * GetRadius() * GetRadius(), Utility::constexpr_sqrt(2.0f) * GetRadius()),
+            controller.getPartitions<Team::RED >().nearby(position, 2 * GetRadius() * GetRadius(), Utility::constexpr_sqrt(2.0f) * GetRadius())
+        );
     }
 
 
@@ -84,10 +85,9 @@ namespace DroneSim::Game {
         GameController& controller = GameController::instance();
 
         // Move tank
-        const Vec2f direction = glm::normalize(getDirection());
-        const Vec2f speed = direction + data->force;
+        const Vec2f direction = glm::normalize(getDirection()) + data->force;
         
-        position += speed * TANK_MAX_SPEED * 0.5f;
+        position += direction * TANK_MAX_SPEED * 0.5f;
         data->force = ZVec2f;
 
 
@@ -95,8 +95,8 @@ namespace DroneSim::Game {
         if (data->reload_time > 0) --data->reload_time;
 
         if (data->reload_time == 0) {
-            const auto& target = controller.findClosestEnemy(*this);
-            controller.getEntities().push_back(EntityRocket<team>(position, target.getPosition()));
+            const auto* target = controller.getPartitions<team == Team::RED ? Team::BLUE : Team::RED>().closest(position);
+            controller.getEntities().push_back(EntityRocket<team>(position, target->getPosition()));
 
             data->reload_time = 200;
         }

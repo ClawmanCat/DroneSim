@@ -237,6 +237,12 @@
     <ClInclude Include="EntityChar.h">
       <Filter>Game\Entity</Filter>
     </ClInclude>
+    <ClInclude Include="MakeVisitor.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="SpatialPartition.h">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\copy_to_build\kernels\test.cl">
