@@ -25,7 +25,7 @@ namespace DroneSim::Game {
         constexpr static u32 NUM_CHUNKS   = AREA_LEN * AREA_LEN;
 
 
-        SpatialPartition(void) {
+        SpatialPartition(void) : min({ 0, 0 }), max({ 0, 0 }) {
             std::fill(partitions.begin(), partitions.end(), std::vector<T*>());
         }
 
@@ -45,6 +45,11 @@ namespace DroneSim::Game {
 
 
         T* closest(const Vec2f& where) {
+            return closest(where, [](auto* elem) { return true; });
+        }
+
+
+        template <typename Pred> T* closest(const Vec2f& where, const Pred& pred) {
             const static Vec2i DIRECTIONS[] = {
                 { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 }, { 0, 0 }
             };
@@ -76,7 +81,7 @@ namespace DroneSim::Game {
                         for (T* elem : partitions[flatten_index(next)]) {
                            const float dsq = distance_squared(where, elem->getPosition());
 
-                           if (dsq < closest_dsq) {
+                           if (dsq < closest_dsq && pred(elem)) {
                                closest_elem = elem;
                                closest_dsq = dsq;
                            }

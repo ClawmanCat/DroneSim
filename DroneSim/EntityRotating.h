@@ -35,7 +35,7 @@ namespace DroneSim::Game {
         }
 
 
-        Vec2f getTarget(void) const { return target; }
+        Vec2f getTarget(void)    const { return target; }
         Vec2f getDirection(void) const { return target - position; }
     protected:
         Vec2f target;

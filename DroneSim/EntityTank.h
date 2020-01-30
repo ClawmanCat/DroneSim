@@ -34,6 +34,7 @@ namespace DroneSim::Game {
 
         void avoidCollision(void);
         void update(void);
+        void post_update(void);
 
         void push(const Vec2f& direction, float magnitude = 1.0f);
         void hit(u16 value);
@@ -52,6 +53,7 @@ namespace DroneSim::Game {
         // Minimize unused data when uploading to GPU by storing additional info as pointer.
         // TODO: Test performance with all data in object. (There will be some overhead from heap allocation as well)
         struct EntityTankAdditionalData {
+            Vec2f tmp_position;
             Vec2f force;
             u16 health;
             u8 reload_time;

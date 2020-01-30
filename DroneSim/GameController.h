@@ -11,10 +11,12 @@
 #include "HealthBar.h"
 #include "PNGLoader.h"
 #include "SpatialPartition.h"
+#include "ConstexprFor.h"
 
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <future>
 
 
 namespace DroneSim::Game {
@@ -33,26 +35,14 @@ namespace DroneSim::Game {
         }
 
 
-        template <typename Tank> const auto& findClosestEnemy(const Tank& tank) const {
-            const auto& enemies = entities.select<EnemyTankSelector<Tank::GetTeam()>>().template get<0>();
+        template <typename T, typename = std::enable_if_t<Entities::Contains<T>()>> void lockEntityStorage(void) {
+            entitiesMtx[entities.FindT<T>()].lock();
+        }
 
-            std::size_t closest = 0;
-            float distanceSq = std::numeric_limits<float>::infinity();
 
-            for (std::size_t i = 0; i < enemies.size(); ++i) {
-                if (!enemies[i].alive()) continue;
-
-                Vec2f d = tank.getPosition() - enemies[i].getPosition();
-                float dsq = Utility::dotself(d);
-
-                if (dsq < distanceSq) {
-                    closest = i;
-                    distanceSq = dsq;
-                }
-            }
-
-            return enemies[closest];
-        };
+        template <typename T, typename = std::enable_if_t<Entities::Contains<T>()>> void unlockEntityStorage(void) {
+            entitiesMtx[entities.FindT<T>()].unlock();
+        }
 
 
         auto& getEntities(void) { return entities; }
@@ -70,10 +60,12 @@ namespace DroneSim::Game {
         u64 frames = 0;
 
         Entities::PolyVector<> entities;
+        std::array<std::mutex, decltype(entities)::Size> entitiesMtx;
 
-        // Tank position tree.
+        // Tank position partitioned storage.
         SpatialPartition<EntityTank<Team::BLUE>>* bluept;
         SpatialPartition<EntityTank<Team::RED >>* redpt;
+
 
         std::vector<HealthBar> topbar, btmbar;  // Health bars.
         std::array<EntityChar*, 4> counter;     // Frame counter.
@@ -98,16 +90,17 @@ namespace DroneSim::Game {
         void tick(void) {
             rebuild_partitions();
 
+            mt_iterate<TankSelector>([](auto& tank) { tank.avoidCollision(); });
 
-            // Perform collision detection on tanks.
-            auto tanks = entities.select<TankSelector>();
-            tanks.forEach([](auto& tank) { tank.avoidCollision(); });
+            // Update tanks and rockets asynchronously, update other entities on the main thread.
+            // Don't update tanks and rockets at the same time, so we can safely push new rockets.
+            // (some require GL calls which may only be done from the main thread.)
+            mt_iterate<TankSelector>([](auto& entity) { entity.update(); });
+            mt_iterate<RocketSelector>([](auto& entity) { entity.update(); });
 
+            entities.select<Invert<Or<TankSelector, RocketSelector>>>().forEach([](auto& entity) { entity.update(); });
 
-            // Update entities.
-            entities.forEach([](auto& entity, std::size_t n) { 
-                entity.update(); 
-            });
+            mt_iterate<SelectAll>([](auto& entity) { entity.post_update(); });
 
 
             // Remove finished explosions.
@@ -138,7 +131,7 @@ namespace DroneSim::Game {
 
 
             // Calculate health bars.
-            // TODO: better sorting algorithm
+            // TODO: GPU conversion of tank objects to health bars.
             auto healthsort = [](const auto& source, auto& dest) {
                 auto convert = [](const auto& tank) { return HealthBar{ tank.getHealth() }; };
                 
@@ -169,6 +162,7 @@ namespace DroneSim::Game {
 
             healthsort(entities.getT<EntityTank<Team::BLUE>>(), topbar);
             healthsort(entities.getT<EntityTank<Team::RED >>(), btmbar);
+
 
 
             // Update frame counter.
@@ -209,6 +203,9 @@ namespace DroneSim::Game {
 
 
         void rebuild_partitions(void) {
+            delete bluept;
+            delete redpt;
+
             redpt  = new SpatialPartition<EntityTank<Team::RED >>();
             bluept = new SpatialPartition<EntityTank<Team::BLUE>>();
 
@@ -270,6 +267,27 @@ namespace DroneSim::Game {
 
 
             return result;
+        }
+
+
+        template <typename Selector, typename Pred> void mt_iterate(const Pred& pred) {
+            std::vector<std::future<void>> handles;
+            const u32 num_workers = 2 * std::thread::hardware_concurrency();
+
+            entities.select<Selector>().forEachSub([&](auto& v) {
+                u32 batch_size = (v.size() / num_workers) + 1;
+
+                for (u32 i = 0; i < std::min(num_workers, (u32) v.size()); ++i) {
+                    auto h = std::async(std::launch::async, [i, batch_size, pred, &v]() {
+                        for (u32 j = batch_size * i; j < std::min(batch_size * (i + 1), (u32) v.size()); ++j) pred(v[j]);
+                    });
+
+                    handles.push_back(std::move(h));
+                }
+            });
+
+
+            for (auto& handle : handles) handle.get();
         }
     };
 }

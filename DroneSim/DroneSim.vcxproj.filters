@@ -243,6 +243,9 @@
     <ClInclude Include="SpatialPartition.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="ConstexprFor.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\copy_to_build\kernels\test.cl">

@@ -28,6 +28,7 @@ namespace DroneSim::Game {
 
 
         void update(void);
+        void post_update(void);
 
         bool alive(void) const;
 
@@ -43,5 +44,7 @@ namespace DroneSim::Game {
 
         // Target is a direction, not a position.
         Vec2f getDirection(void) const { return target; }
+    private:
+        Vec2f position_tmp;
     };
 }

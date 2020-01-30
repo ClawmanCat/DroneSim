@@ -4,15 +4,14 @@
 #include "EntityRocket.h"
 #include "TextureManager.h"
 
-
 namespace DroneSim::Game {
     template <Team team> EntityTank<team>::EntityTank(const Vec2f& pos, const Vec2f& target) : Base(pos, target) {
-        data = new EntityTankAdditionalData{ ZVec2f, TANK_MAX_HEALTH, 0 };
+        data = new EntityTankAdditionalData{ pos, ZVec2f, TANK_MAX_HEALTH, 0 };
     }
 
 
     template <Team team> EntityTank<team>::EntityTank(const EntityTank<team>& e) : Base(e) {
-        data = new EntityTankAdditionalData{ e.data->force, e.data->health, e.data->reload_time };
+        data = new EntityTankAdditionalData{ e.data->tmp_position, e.data->force, e.data->health, e.data->reload_time };
     }
 
 
@@ -29,7 +28,7 @@ namespace DroneSim::Game {
 
     template <Team team> EntityTank<team>& EntityTank<team>::operator=(const EntityTank<team>& e) {
         if (data) delete data;
-        data = new EntityTankAdditionalData{ e.data->force, e.data->health, e.data->reload_time };
+        data = new EntityTankAdditionalData{ e.data->tmp_position, e.data->force, e.data->health, e.data->reload_time };
 
         static_cast<Base&>(*this).operator=(static_cast<const Base&>(e));
         return *this;
@@ -87,7 +86,7 @@ namespace DroneSim::Game {
         // Move tank
         const Vec2f direction = glm::normalize(getDirection()) + data->force;
         
-        position += direction * TANK_MAX_SPEED * 0.5f;
+        data->tmp_position = position + direction * TANK_MAX_SPEED * 0.5f;
         data->force = ZVec2f;
 
 
@@ -95,8 +94,11 @@ namespace DroneSim::Game {
         if (data->reload_time > 0) --data->reload_time;
 
         if (data->reload_time == 0) {
-            const auto* target = controller.getPartitions<team == Team::RED ? Team::BLUE : Team::RED>().closest(position);
+            const auto* target = controller.getPartitions<EnemyOf<team>()>().closest(position, [](auto* tank) { return tank->alive(); });
+
+            controller.lockEntityStorage<EntityRocket<team>>();
             controller.getEntities().push_back(EntityRocket<team>(position, target->getPosition()));
+            controller.unlockEntityStorage<EntityRocket<team>>();
 
             data->reload_time = 200;
         }
@@ -112,6 +114,11 @@ namespace DroneSim::Game {
     }
 
 
+    template <Team team> void EntityTank<team>::post_update(void) {
+        position = data->tmp_position;
+    }
+
+
     template <Team team> void EntityTank<team>::push(const Vec2f& direction, float magnitude) {
         data->force += (direction * magnitude);
     }
@@ -122,7 +129,9 @@ namespace DroneSim::Game {
         
         if (data->health <= value) {
             if (data->health != 0) {
+                controller.lockEntityStorage<EntitySmoke>();
                 controller.getEntities().getT<EntitySmoke>().push_back(EntitySmoke(position + Vec2f{ 15, 15 }));
+                controller.unlockEntityStorage<EntitySmoke>();
                 data->health = 0;
             }
         } else data->health -= value;

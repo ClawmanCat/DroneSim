@@ -8,8 +8,7 @@ namespace DroneSim::Game {
         GameController& controller = GameController::instance();
 
         // Move
-        position += ROCKET_MAX_SPEED * target;
-
+        position_tmp = position + ROCKET_MAX_SPEED * target;
 
         // Explode if near enemy.
         constexpr float tankradius = EntityTank<EnemyOf<team>()>::GetRadius();
@@ -21,7 +20,10 @@ namespace DroneSim::Game {
         for (auto* tank : nearby) {
             if (tank->alive()) {
                 tank->hit(ROCKET_DAMAGE);
+
+                controller.lockEntityStorage<EntityExplosion>();
                 controller.getEntities().push_back(EntityExplosion(position));
+                controller.unlockEntityStorage<EntityExplosion>();
 
                 // Mark for deletion.
                 target = DESTRUCT_POINT;
@@ -30,6 +32,11 @@ namespace DroneSim::Game {
 
 
         static_cast<Base*>(this)->update();
+    }
+
+
+    template <Team team> void EntityRocket<team>::post_update(void) {
+        position = position_tmp;
     }
 
 

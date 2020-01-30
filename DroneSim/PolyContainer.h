@@ -46,7 +46,7 @@ namespace DroneSim::Traits {
 
         // Find the index of the subcontainer containing elements of the type T.
         template <typename T, std::size_t N = 0> constexpr static std::size_t FindT(void) {
-            if (std::is_same_v<wrapped_t<T>, ElemTypeAt<N>>) return N;
+            if constexpr (std::is_same_v<wrapped_t<T>, ElemTypeAt<N>>) return N;
             else return FindT<T, N + 1>();
         }
 

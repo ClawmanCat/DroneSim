@@ -26,6 +26,34 @@ namespace DroneSim::Game {
     };
 
 
+    struct SelectAll {
+        template <typename C, std::size_t N> constexpr static bool select(void) {
+            return true;
+        }
+    };
+
+
+    template <typename T> struct Invert {
+        template <typename C, std::size_t N> constexpr static bool select(void) {
+            return !T::template select<C, N>();
+        }
+    };
+
+
+    template <typename... Ts> struct And {
+        template <typename C, std::size_t N> constexpr static bool select(void) {
+            return (Ts::template select<C, N>() && ...);
+        }
+    };
+
+
+    template <typename... Ts> struct Or {
+        template <typename C, std::size_t N> constexpr static bool select(void) {
+            return (Ts::template select<C, N>() || ...);
+        }
+    };
+
+
     struct TankSelector {
         template <typename C, std::size_t N> constexpr static bool select(void) {
             return Traits::IsVariableSpecialization<Team>::IsSpecialization<EntityTank, typename C::value_type>::value;

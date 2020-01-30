@@ -8,6 +8,7 @@
 #include <GL/glew.h>
 
 #include <string>
+#include <mutex>
 
 namespace DroneSim::Game {
     // We can't move IEntity methods to a cpp file, since it's a template class,
@@ -43,12 +44,17 @@ namespace DroneSim::Game {
         IEntity(const Vec2f& position, u32 frame = 0) : position(position), frame(frame) {}
 
 
+        // 1st update phase: it is safe to read from other entities' positions.
         void update(void) {
             if (Detail::GetSimulationFrameCount() % GetFrameRepeatCount() != 0) return;
 
             if (frame < (GetFrameCount() - 1)) ++frame;
             else frame = 0;
         }
+
+
+        // 2nd update phase: it is safe to write to the objects position.
+        void post_update(void) {}
 
 
         Vec2f getPosition(void)     const { return position; }

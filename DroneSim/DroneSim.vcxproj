@@ -195,6 +195,7 @@
     <ClInclude Include="CLGroupSize.h" />
     <ClInclude Include="CLProgram.h" />
     <ClInclude Include="ConstexprArg.h" />
+    <ClInclude Include="ConstexprFor.h" />
     <ClInclude Include="EntityBeam.h" />
     <ClInclude Include="EntityBGOverlay.h" />
     <ClInclude Include="EntityChar.h" />

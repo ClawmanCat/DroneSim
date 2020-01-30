@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <string_view>
+#include <shared_mutex>
 
 namespace DroneSim::GPU {
     class TextureManager {
@@ -29,19 +30,29 @@ namespace DroneSim::GPU {
 
         
         TextureID getTextureID(std::string_view name) {
+            static std::shared_mutex mtx;
+
             std::string path = StringUtils::cat(Paths::PATH_TEXTURES, name, ".png");
 
-            // Check if texture is already loaded.
-            auto it = ids.find(path);
-            if (it != ids.end()) return it->second;
+            {
+                std::shared_lock lock(mtx);
 
-            // Load texture.
-            auto data = FileIO::LoadPNG(path);
-            auto id   = load_gl_texture(data);
+                // Check if texture is already loaded.
+                auto it = ids.find(path);
+                if (it != ids.end()) return it->second;
+            }
 
-            ids.insert({ path, id });
+            {
+                std::unique_lock lock(mtx);
 
-            return id;
+                // Load texture.
+                auto data = FileIO::LoadPNG(path);
+                auto id = load_gl_texture(data);
+
+                ids.insert({ path, id });
+
+                return id;
+            }
         }
     private:
         HashMap<std::string, TextureID> ids;
