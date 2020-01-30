@@ -189,6 +189,7 @@
     <ClCompile Include="WindowController.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ArrayCat.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="CLBuffer.h" />
     <ClInclude Include="CLCompiler.h" />
@@ -218,7 +219,6 @@
     <ClInclude Include="GameController.h" />
     <ClInclude Include="GLSetUniform.h" />
     <ClInclude Include="EntityBackground.h" />
-    <ClInclude Include="HealthBar.h" />
     <ClInclude Include="IsSpecialization.h" />
     <ClInclude Include="ITextureProvider.h" />
     <ClInclude Include="MakeVisitor.h" />

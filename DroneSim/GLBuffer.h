@@ -106,6 +106,7 @@ namespace DroneSim::GPU {
             for (const auto& component : T::GetObjectLayout()) {
                 // TODO: Remember indices between calls.
                 GLint index = glGetAttribLocation(program, component.name);
+                if (index == -1) continue;
 
                 glEnableVertexAttribArray(index);
                 glVertexAttribPointer(index, component.count, component.type, GL_FALSE, sizeof(T), (void*) component.offset);

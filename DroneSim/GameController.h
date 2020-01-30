@@ -8,7 +8,6 @@
 #include "Timer.h"
 #include "PolyVector.h"
 #include "EntitySelectors.h"
-#include "HealthBar.h"
 #include "PNGLoader.h"
 #include "SpatialPartition.h"
 #include "ConstexprFor.h"
@@ -66,14 +65,12 @@ namespace DroneSim::Game {
         SpatialPartition<EntityTank<Team::BLUE>>* bluept;
         SpatialPartition<EntityTank<Team::RED >>* redpt;
 
-
-        std::vector<HealthBar> topbar, btmbar;  // Health bars.
         std::array<EntityChar*, 4> counter;     // Frame counter.
 
         Render::Renderer2D renderer;
 
 
-        GameController(void) : timer(), entities(GetInitialEntities()), renderer(entities, topbar, btmbar) {
+        GameController(void) : timer(), entities(GetInitialEntities()), renderer(entities) {
             // Set frame counter.
             for (u32 i = 0; i < counter.size(); ++i) {
                 counter[i] = &(*(entities.getT<EntityChar>().end() - counter.size() + i));
@@ -131,37 +128,19 @@ namespace DroneSim::Game {
 
 
             // Calculate health bars.
-            // TODO: GPU conversion of tank objects to health bars.
-            auto healthsort = [](const auto& source, auto& dest) {
-                auto convert = [](const auto& tank) { return HealthBar{ tank.getHealth() }; };
-                
-                dest.clear();
-                dest.reserve(source.size());
+            // Insertion sort is actually faster here since the array is already nearly sorted.
+            entities.select<TankSelector>().forEachSub([](auto& v) {
+                for (u32 i = 1; i < v.size(); ++i) {
+                    auto current = std::move(v[i]);
 
-                dest.push_back(convert(source.front()));
-
-                for (u32 i = 1; i < source.size(); ++i) {
-                    auto first = convert(source[i]);
-
-                    for (u32 j = dest.size() - 1; j >= 0; --j) {
-                        const auto& second = dest[j];
-
-                        if (second.value > first.value) {
-                            dest.insert(dest.begin() + j + 1, first);
-                            break;
-                        }
-
-                        if (j == 0) {
-                            dest.insert(dest.begin(), first);
-                            break;
-                        }
+                    i32 j;
+                    for (j = i - 1; j >= 0 && v[j].getHealth() > current.getHealth(); --j) {
+                        v[j + 1] = std::move(v[j]);
                     }
-                }
-            };
-            
 
-            healthsort(entities.getT<EntityTank<Team::BLUE>>(), topbar);
-            healthsort(entities.getT<EntityTank<Team::RED >>(), btmbar);
+                    v[j + 1] = std::move(current);
+                }
+            });
 
 
 

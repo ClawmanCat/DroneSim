@@ -222,9 +222,6 @@
     <ClInclude Include="EntitySelectors.h">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="HealthBar.h">
-      <Filter>Game</Filter>
-    </ClInclude>
     <ClInclude Include="RenderableList.h">
       <Filter>Game</Filter>
     </ClInclude>
@@ -244,6 +241,9 @@
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="ConstexprFor.h">
+      <Filter>Utility\Traits</Filter>
+    </ClInclude>
+    <ClInclude Include="ArrayCat.h">
       <Filter>Utility\Traits</Filter>
     </ClInclude>
   </ItemGroup>

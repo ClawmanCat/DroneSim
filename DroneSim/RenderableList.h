@@ -2,9 +2,9 @@
 
 #include "Core.h"
 #include "EntityList.h"
-#include "HealthBar.h"
 
 
 namespace DroneSim::Game {
-    using Renderables = typename Entities::template Append<HealthBar>;
+    // Allow other types to be rendered using Entities::Append
+    using Renderables = Entities;
 }

@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "Teams.h"
 #include "IsSpecialization.h"
+#include "VariadicSplitter.h"
 
 #include "EntityTank.h"
 #include "EntityRocket.h"

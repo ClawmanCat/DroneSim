@@ -9,7 +9,6 @@
 #include "GameConstants.h"
 #include "VariadicSplitter.h"
 #include "ILayoutObject.h"
-#include "HealthBar.h"
 #include "GLFrameBuffer.h"
 #include "EntitySelectors.h"
 
@@ -23,15 +22,13 @@ namespace DroneSim::Render {
         Renderer2D& operator=(const Renderer2D&) = delete;
 
 
-        Renderer2D(const Game::Entities::PolyVector<>& entities, const std::vector<Game::HealthBar>& top, const std::vector<Game::HealthBar>& btm) :
+        Renderer2D(const Game::Entities::PolyVector<>& entities) :
             renderables(entities),
             buffers(entities.convert<decltype(buffers)>([](const auto& v) {
                 return std::vector{ new GPU::GLBuffer<typename no_ref<decltype(v)>::value_type>(GL_POINTS) };
             })),
             worldShader(GPU::GLCompiler::instance().compile("batch")),
-            healthShader(GPU::GLCompiler::instance().compile("health")),
-            topbar(top),
-            btmbar(btm)
+            healthShader(GPU::GLCompiler::instance().compile("health"))
         {}
 
 
@@ -70,24 +67,21 @@ namespace DroneSim::Render {
             // Render health bars
             constexpr static float HEIGHT = 2.0f * float(Game::HEALTHBAR_HEIGHT) / Game::WINDOW_HEIGHT;
 
-            auto renderbuffer = [&](const auto& src, auto& dest, float offset) {
-                dest.modify(0, src);
-                dest.resize(src.size());
+            auto tanks = buffers.select<Game::BufferPointerWrapper<Game::TankSelector>>();
 
-                healthShader.addBuffer(&dest);
+            u32 offset_index = 0;
+            tanks.forEach([&](auto* buffer) {
+                healthShader.addBuffer(buffer);
 
-                healthShader.setUniform("count",  (u32) src.size());
-                healthShader.setUniform("offset", offset);
+                healthShader.setUniform("count",  (u32) buffer->size());
+                healthShader.setUniform("offset", (offset_index++ == 0) ? -1.0f : 1.0f - HEIGHT);
                 healthShader.setUniform("height", HEIGHT);
                 healthShader.setUniform("limit",  (float) Game::TANK_MAX_HEALTH);
 
                 healthShader.execute();
 
-                healthShader.removeBuffer(&dest);
-            };
-
-            renderbuffer(topbar, topbuffer, 1.0 - HEIGHT);
-            renderbuffer(btmbar, btmbuffer, -1.0);
+                healthShader.removeBuffer(buffer);
+            });
         }
     private:
         // Store pointer so we can keep references to each buffer in the renderer.
@@ -98,10 +92,5 @@ namespace DroneSim::Render {
         Game::Entities::Wrap<Wrapper>::PolyVector<> buffers;
 
         GPU::GLProgram worldShader, healthShader;
-
-
-        // Health bars.
-        const std::vector<Game::HealthBar> &topbar, &btmbar;
-        GPU::GLBuffer<Game::HealthBar> topbuffer, btmbuffer;
     };
 }

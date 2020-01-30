@@ -3,8 +3,14 @@
 #include <vector>
 #include <utility>
 #include <limits>
+#include <iostream>
 
 namespace DroneSim::Utility {
+    template <typename T> inline void print_t(void) {
+        std::cout << __PRETTY_FUNCTION__ << '\n';
+    }
+
+
     template <typename T> inline void swap_erase(std::vector<T>& v, typename std::vector<T>::iterator where) {
         std::swap(*where, v.back());
         v.pop_back();

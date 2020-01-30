@@ -5,17 +5,17 @@
 #include "TextureManager.h"
 
 namespace DroneSim::Game {
-    template <Team team> EntityTank<team>::EntityTank(const Vec2f& pos, const Vec2f& target) : Base(pos, target) {
-        data = new EntityTankAdditionalData{ pos, ZVec2f, TANK_MAX_HEALTH, 0 };
+    template <Team team> EntityTank<team>::EntityTank(const Vec2f& pos, const Vec2f& target) : Base(pos, target), health(TANK_MAX_HEALTH) {
+        data = new EntityTankAdditionalData{ pos, ZVec2f, 0 };
     }
 
 
-    template <Team team> EntityTank<team>::EntityTank(const EntityTank<team>& e) : Base(e) {
-        data = new EntityTankAdditionalData{ e.data->tmp_position, e.data->force, e.data->health, e.data->reload_time };
+    template <Team team> EntityTank<team>::EntityTank(const EntityTank<team>& e) : Base(e), health(e.health) {
+        data = new EntityTankAdditionalData{ e.data->tmp_position, e.data->force, e.data->reload_time };
     }
 
 
-    template <Team team> EntityTank<team>::EntityTank(EntityTank<team>&& e) : Base(std::forward<EntityTank<team>>(e)) {
+    template <Team team> EntityTank<team>::EntityTank(EntityTank<team>&& e) : Base(std::forward<EntityTank<team>>(e)), health(e.health) {
         data = e.data;
         e.data = nullptr;
     }
@@ -28,7 +28,9 @@ namespace DroneSim::Game {
 
     template <Team team> EntityTank<team>& EntityTank<team>::operator=(const EntityTank<team>& e) {
         if (data) delete data;
-        data = new EntityTankAdditionalData{ e.data->tmp_position, e.data->force, e.data->health, e.data->reload_time };
+        data = new EntityTankAdditionalData{ e.data->tmp_position, e.data->force, e.data->reload_time };
+
+        health = e.health;
 
         static_cast<Base&>(*this).operator=(static_cast<const Base&>(e));
         return *this;
@@ -40,6 +42,8 @@ namespace DroneSim::Game {
         data = e.data;
         e.data = nullptr;
 
+        health = e.health;
+
         static_cast<Base&>(*this).operator=(static_cast<Base&&>(std::move(e)));
         return *this;
     }
@@ -47,7 +51,7 @@ namespace DroneSim::Game {
 
     template <Team team> void EntityTank<team>::avoidCollision(void) {
         // Don't push if this tank is dead.
-        if (data->health == 0) return;
+        if (health == 0) return;
 
         GameController& controller = GameController::instance();
 
@@ -79,7 +83,7 @@ namespace DroneSim::Game {
 
 
     template <Team team> void EntityTank<team>::update(void) {
-        if (data->health == 0) return;
+        if (health == 0) return;
 
         GameController& controller = GameController::instance();
 
@@ -127,14 +131,14 @@ namespace DroneSim::Game {
     template <Team team> void EntityTank<team>::hit(u16 value) {
         GameController& controller = GameController::instance();
         
-        if (data->health <= value) {
-            if (data->health != 0) {
+        if (health <= value) {
+            if (health != 0) {
                 controller.lockEntityStorage<EntitySmoke>();
                 controller.getEntities().getT<EntitySmoke>().push_back(EntitySmoke(position + Vec2f{ 15, 15 }));
                 controller.unlockEntityStorage<EntitySmoke>();
-                data->health = 0;
+                health = 0;
             }
-        } else data->health -= value;
+        } else health -= value;
     }
 
 
@@ -149,7 +153,7 @@ namespace DroneSim::Game {
 
 
     template <Team team> bool EntityTank<team>::alive(void) const {
-        return data->health > 0;
+        return health > 0;
     }
 
 

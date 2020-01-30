@@ -4,6 +4,7 @@
 #include "EntityRotating.h"
 #include "Teams.h"
 #include "GameConstants.h"
+#include "ArrayCat.h"
 
 
 namespace DroneSim::Game {
@@ -32,6 +33,15 @@ namespace DroneSim::Game {
         constexpr static Team             GetTeam(void)          { return team;                                           }
 
 
+        constexpr static auto GetObjectLayout(void) {
+            return Traits::array_cat(
+                Base::GetObjectLayout(),
+                std::array {
+                    DRONESIM_GEN_LAYOUT_OBJ(EntityTank, health)
+                }
+            );
+        }
+
         void avoidCollision(void);
         void update(void);
         void post_update(void);
@@ -44,7 +54,7 @@ namespace DroneSim::Game {
         bool alive(void) const;
 
 
-        u16 getHealth(void) const { return data->health; }
+        u16 getHealth(void) const { return health; }
 
 
         template <typename T> constexpr bool operator==      (const T&    t) const { return false; }
@@ -55,8 +65,11 @@ namespace DroneSim::Game {
         struct EntityTankAdditionalData {
             Vec2f tmp_position;
             Vec2f force;
-            u16 health;
             u8 reload_time;
         } *data;
+
+
+        // Required in object for rendering health bars.
+        u32 health;
     };
 }
