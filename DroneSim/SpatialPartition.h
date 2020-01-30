@@ -13,7 +13,7 @@ namespace DroneSim::Game {
         constexpr static u32 AREA_EXP     = 12;
         constexpr static u32 AREA         = 1u << AREA_EXP;
         // The size of one partition.
-        constexpr static u32 CHUNK_EXP    = 5;
+        constexpr static u32 CHUNK_EXP    = 6;
         constexpr static u32 CHUNK        = 1u << CHUNK_EXP;
         // Half the size of the area. The area is contained in [-HF_AREA, HF_AREA)
         constexpr static u32 HF_AREA_EXP  = AREA_EXP - 1;
