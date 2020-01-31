@@ -26,25 +26,12 @@ namespace DroneSim::Game {
         constexpr static std::string_view GetTexture(void)       { return (team == Team::RED) ? "rocket_red" : "rocket_blue"; }
         constexpr static float            GetRadius(void)        { return 10.0;                                               }
 
-
-        void update(void);
         void post_update(void);
 
         bool alive(void) const;
 
 
-        template <typename Tank> bool collides(const Tank& tank) const {
-            const Vec2f delta      = tank.getPosition() - position;
-            const float distanceSq = Utility::dotself(delta);
-            const float radiusSq   = Utility::square(Tank::GetRadius() + GetRadius());
-
-            return distanceSq <= radiusSq;
-        }
-
-
         // Target is a direction, not a position.
         Vec2f getDirection(void) const { return target; }
-    private:
-        Vec2f position_tmp;
     };
 }

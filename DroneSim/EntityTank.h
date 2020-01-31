@@ -64,6 +64,7 @@ namespace DroneSim::Game {
         // TODO: Test performance with all data in object. (There will be some overhead from heap allocation as well)
         struct EntityTankAdditionalData {
             Vec2f tmp_position;
+            Vec2f target;
             Vec2f force;
             u8 reload_time;
         } *data;

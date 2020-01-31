@@ -6,12 +6,12 @@
 
 namespace DroneSim::Game {
     template <Team team> EntityTank<team>::EntityTank(const Vec2f& pos, const Vec2f& target) : Base(pos, target), health(TANK_MAX_HEALTH) {
-        data = new EntityTankAdditionalData{ pos, ZVec2f, 0 };
+        data = new EntityTankAdditionalData{ pos, ZVec2f, ZVec2f, 0 };
     }
 
 
     template <Team team> EntityTank<team>::EntityTank(const EntityTank<team>& e) : Base(e), health(e.health) {
-        data = new EntityTankAdditionalData{ e.data->tmp_position, e.data->force, e.data->reload_time };
+        data = new EntityTankAdditionalData{ e.data->tmp_position, e.data->target, e.data->force, e.data->reload_time };
     }
 
 
@@ -28,7 +28,7 @@ namespace DroneSim::Game {
 
     template <Team team> EntityTank<team>& EntityTank<team>::operator=(const EntityTank<team>& e) {
         if (data) delete data;
-        data = new EntityTankAdditionalData{ e.data->tmp_position, e.data->force, e.data->reload_time };
+        data = new EntityTankAdditionalData{ e.data->tmp_position, e.data->target, e.data->force, e.data->reload_time };
 
         health = e.health;
 
@@ -87,6 +87,8 @@ namespace DroneSim::Game {
 
         GameController& controller = GameController::instance();
 
+        avoidCollision();
+
         // Move tank
         const Vec2f direction = glm::normalize(getDirection()) + data->force;
         
@@ -99,27 +101,36 @@ namespace DroneSim::Game {
 
         if (data->reload_time == 0) {
             const auto* target = controller.getPartitions<EnemyOf<team>()>().closest(position, [](auto* tank) { return tank->alive(); });
-
-            controller.lockEntityStorage<EntityRocket<team>>();
-            controller.getEntities().push_back(EntityRocket<team>(position, target->getPosition()));
-            controller.unlockEntityStorage<EntityRocket<team>>();
-
-            data->reload_time = 200;
+            data->target = target->getPosition();
         }
 
 
         // Draw tracks
         const static Vec2f HALF_SIZE = 0.5f * GetSize();
 
+        // Should be threadsafe, we never write to the same pixel multiple times.
         auto& overlay = controller.getEntities().getT<EntityBGOverlay>()[0];
         overlay.updateOverlay((Vec2ui) (position - HALF_SIZE), { 0x80, 0x80, 0x80, 0xFF });
+
 
         static_cast<Base&>(*this).update();
     }
 
 
     template <Team team> void EntityTank<team>::post_update(void) {
+        if (health == 0) return;
+
+        GameController& controller = GameController::instance();
+
+
         position = data->tmp_position;
+
+        if (data->reload_time == 0) {
+            std::lock_guard lock(controller.getEntitiesMtx());
+            controller.getEntities().push_back(EntityRocket<team>(position, data->target));
+
+            data->reload_time = 200;
+        }
     }
 
 
@@ -133,9 +144,9 @@ namespace DroneSim::Game {
         
         if (health <= value) {
             if (health != 0) {
-                controller.lockEntityStorage<EntitySmoke>();
+                std::lock_guard(controller.getEntitiesMtx());
                 controller.getEntities().getT<EntitySmoke>().push_back(EntitySmoke(position + Vec2f{ 15, 15 }));
-                controller.unlockEntityStorage<EntitySmoke>();
+
                 health = 0;
             }
         } else health -= value;

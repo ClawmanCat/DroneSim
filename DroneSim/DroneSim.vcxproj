@@ -182,6 +182,7 @@
     <ClCompile Include="EntityRocket.cpp" />
     <ClCompile Include="EntityTank.cpp" />
     <ClCompile Include="FileIO.cpp" />
+    <ClCompile Include="GameController.cpp" />
     <ClCompile Include="GLCompiler.cpp" />
     <ClCompile Include="IEntity.cpp" />
     <ClCompile Include="LodePNG.cpp" />

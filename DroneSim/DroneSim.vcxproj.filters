@@ -29,6 +29,9 @@
     <ClCompile Include="EntityBeam.cpp">
       <Filter>Game\Entity</Filter>
     </ClCompile>
+    <ClCompile Include="GameController.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utility">

@@ -34,7 +34,14 @@ namespace DroneSim::Game {
     };
 
 
-    template <typename T> struct Invert {
+    template <typename... Ts> struct Select {
+        template <typename C, std::size_t N> constexpr static bool select(void) {
+            return Traits::ClassList<Ts...>::template Contains<typename C::value_type>();
+        }
+    };
+
+
+    template <typename T> struct Not {
         template <typename C, std::size_t N> constexpr static bool select(void) {
             return !T::template select<C, N>();
         }

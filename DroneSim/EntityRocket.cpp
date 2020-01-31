@@ -4,11 +4,11 @@
 
 
 namespace DroneSim::Game {
-    template <Team team> void EntityRocket<team>::update(void) {
-        GameController& controller = GameController::instance();
+    // We edit the position and push explosions, so don't run this asynchronously.
+    template <Team team> void EntityRocket<team>::post_update(void) {
+        auto& controller = GameController::instance();
 
-        // Move
-        position_tmp = position + ROCKET_MAX_SPEED * target;
+        position += ROCKET_MAX_SPEED * target;
 
         // Explode if near enemy.
         constexpr float tankradius = EntityTank<EnemyOf<team>()>::GetRadius();
@@ -18,25 +18,20 @@ namespace DroneSim::Game {
         auto nearby = controller.getPartitions<EnemyOf<team>()>().nearby(position, fakeDsq, Utility::constexpr_sqrt(fakeDsq));
 
         for (auto* tank : nearby) {
+            // Prevent concurrent access to tank health.
+            static std::mutex mtx { };
+            std::lock_guard lock(mtx);
+
             if (tank->alive()) {
                 tank->hit(ROCKET_DAMAGE);
 
-                controller.lockEntityStorage<EntityExplosion>();
+                std::lock_guard lock(controller.getEntitiesMtx());
                 controller.getEntities().push_back(EntityExplosion(position));
-                controller.unlockEntityStorage<EntityExplosion>();
 
                 // Mark for deletion.
                 target = DESTRUCT_POINT;
             }
         }
-
-
-        static_cast<Base*>(this)->update();
-    }
-
-
-    template <Team team> void EntityRocket<team>::post_update(void) {
-        position = position_tmp;
     }
 
 
